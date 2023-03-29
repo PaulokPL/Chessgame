@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RCC>
+    <qresource prefix="/chess_pieces">
+        <file>icons/white_pawn.png</file>
+        <file>icons/white_rook.png</file>
+        <file>icons/white_knight.png</file>
+        <file>icons/white_bishop.png</file>
+        <file>icons/white_queen.png</file>
+        <file>icons/white_king.png</file>
+        <file>icons/black_pawn.png</file>
+        <file>icons/black_rook.png</file>
+        <file>icons/black_knight.png</file>
+        <file>icons/black_bishop.png</file>
+        <file>icons/black_queen.png</file>
+        <file>icons/black_king.png</file>
+    </qresource>
+</RCC>
