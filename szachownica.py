@@ -10,14 +10,14 @@ from chess_square import ChessSquare
 class ChessBoard(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setSceneRect(-50, -50, 800, 800)
+        # self.setSceneRect(-50, -50, 800, 800)
         self.square_size = 80
-        self.addRect(-80, -80, 800, 800, QPen(), QBrush(QColor("#c9b18b")))
+        # self.addRect(-80, -80, 800, 800, QPen(), QBrush(QColor("#c9b18b")))
         self.setBackgroundBrush(QBrush(QColor(162, 164, 168, 255)))
         self.white_pieces = []
         self.black_pieces = []
         self.current_player = "white"
-        self.addLabels()  # dodajemy etykiety do planszy
+        # self.addLabels()  # dodajemy etykiety do planszy
         QResource.registerResource("chess_pieces.qrc")
 
         for row in range(8):
@@ -92,17 +92,17 @@ class ChessBoard(QGraphicsScene):
     def changeBoardColor(self, color1, color2):
         for item in self.items():
             if isinstance(item, ChessSquare):
-                if item.color == "#FFF":
+                if item.color == "white":
                     item.color = color2
                     item.setBrush(QBrush(QColor(item.color)))
-                elif item.color == "#555":
+                elif item.color == "grey":
                     item.color = color1
                     item.setBrush(QBrush(QColor(item.color)))
                 elif item.color == color2:
-                    item.color = "#FFF"
+                    item.color = "white"
                     item.setBrush(QBrush(QColor(item.color)))
                 elif item.color == color1:
-                    item.color = "#555"
+                    item.color = "grey"
                     item.setBrush(QBrush(QColor(item.color)))
 
     def addLabels(self):
@@ -111,14 +111,20 @@ class ChessBoard(QGraphicsScene):
         for i, letter in enumerate(letters):
             text = QGraphicsTextItem(letter)
             text.setFont(QFont("Arial", 16))
-            text.setPos(i * 100 + 50, 80)
+            text.setPos(i * 80 + 30, -30)
             self.addItem(text)
+            text1 = QGraphicsTextItem(letter)
+            text1.setFont(QFont("Arial", 16))
+            text1.setPos(i * 80 + 30, 640)
+            self.addItem(text1)
 
         # Dodajemy etykiety z numerami od 1 do 8
         for i in range(8):
             text = QGraphicsTextItem(str(i + 1))
             text.setFont(QFont("Arial", 16))
-            text.setPos(0, i * 80 + 50)
+            text.setPos(-30, - i * 80 + 585 )
             self.addItem(text)
-            text.setPos(830, i * 80 + 50)
-            self.addItem(text)
+            text1 = QGraphicsTextItem(str(i + 1))
+            text1.setFont(QFont("Arial", 16))
+            text1.setPos(650, - i * 80 + 585)
+            self.addItem(text1)
