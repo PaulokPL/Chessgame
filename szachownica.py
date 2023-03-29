@@ -10,14 +10,14 @@ from chess_square import ChessSquare
 class ChessBoard(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
-        # self.setSceneRect(-50, -50, 800, 800)
+        self.setSceneRect(-50, -50, 800, 800)
         self.square_size = 80
-        # self.addRect(-80, -80, 800, 800, QPen(), QBrush(QColor("#c9b18b")))
+        self.addRect(-80, -80, 800, 800, QPen(), QBrush(QColor("#c9b18b")))
         self.setBackgroundBrush(QBrush(QColor(162, 164, 168, 255)))
         self.white_pieces = []
         self.black_pieces = []
         self.current_player = "white"
-        # self.addLabels()  # dodajemy etykiety do planszy
+        self.addLabels()  # dodajemy etykiety do planszy
         QResource.registerResource("chess_pieces.qrc")
 
         for row in range(8):

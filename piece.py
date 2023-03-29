@@ -43,7 +43,7 @@ class ChessPiece(QGraphicsPixmapItem):
         # Sprawdza, czy pionek jest wybrany i przesuwa go na nową pozycję
         if self.selected:
             new_pos = event.scenePos() - self.offset
-            # if new_pos.x() < 0 or new_pos.y() < 0 or new_pos.x() + self.square_size > self.scene().width() or new_pos.y() + self.square_size > self.scene().height():
+            # if new_pos.x() < -10 or new_pos.y() < -10 or new_pos.x() + self.square_size > self.scene().width() + 10 or new_pos.y() + self.square_size > self.scene().height() + 10:
             #     return
             self.setPos(new_pos)
 
