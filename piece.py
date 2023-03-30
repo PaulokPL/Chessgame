@@ -400,37 +400,37 @@ class ChessPiece(QGraphicsPixmapItem):
 
     def is_square_occupied(self, x, y):
         items = self.scene().items(QPointF(x+10, y+10))
-        for item in items:
-            if isinstance(item, ChessSquare):
-                square = item
-                if square.piece is not None:
-                    return square.piece.color
+        # for item in items:
+        #     if isinstance(item, ChessSquare):
+        square = items[0]
+        if square.piece is not None:
+            return square.piece.color
         return None
 
     def is_square_occupiedv1(self, x, y):
         items = self.scene().items(QPointF(x+10, y+10))
-        for item in items:
-            if isinstance(item, ChessSquare):
-                square = item
-                if square.piece is not None:
-                    return square.piece
+        # for item in items:
+        #     if isinstance(item, ChessSquare):
+        square = items[0]
+        if square.piece is not None:
+            return square.piece
         return None
 
     def is_square_occupiedv2(self, x, y):
         items = self.scene().items(QPointF(x + 10, y + 10))
-        for item in items:
-            if isinstance(item, ChessSquare):
-                square = item
-                if square.piece is not None:
-                    return True
+        # for item in items:
+        #     if isinstance(item, ChessSquare):
+        square = items[0]
+        if square.piece is not None:
+            return True
         return False
     def is_square_occupiedv3(self, x, y):
         items = self.scene().items(QPointF(x+10, y+10))
-        for item in items:
-            if isinstance(item, ChessSquare):
-                square = item
-                if square.piece is not None:
-                    return square.piece.piece_type
+        # for item in items:
+        #     if isinstance(item, ChessSquare):
+        square = items[0]
+        if square.piece is not None:
+            return square.piece.piece_type
         return None
 
     def change_player(self):
