@@ -21,6 +21,10 @@ class ChessPiece(QGraphicsPixmapItem):
         self.possible_moves = []
         self.current_square = None
         self.old_colors = []
+        self.has_moved = False
+        self.first_move = False
+        self.en_paissant = False
+
 
 
     def mousePressEvent(self, event):
@@ -74,12 +78,41 @@ class ChessPiece(QGraphicsPixmapItem):
                 self.current_square.piece = None
                 self.current_square = square
                 self.setPos(new_pos)
+                if (self.piece_type == "king"):
+                    if abs(self.x - new_pos.x()) > 90:
+                        if new_pos.x() == 480:
+                            square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
+                            piece1 = square1[0].piece
+                            piece1.setPos(400, piece1.y)
+                            piece1.x = 400
+                            piece1.setZValue(1)
+                            square1[0].piece = None
+                            square2 = self.scene().items(QPointF(440, new_pos.y() + 10),
+                                                         Qt.IntersectsItemShape)
+                            square2[0].piece = piece1
+                            piece1.current_square = square2[0]
+
+                        else:
+                            square1 = self.scene().items(QPointF(0, new_pos.y() + 10), Qt.IntersectsItemShape)
+                            piece1 = square1[0].piece
+                            piece1.setPos(240, piece1.y)
+                            piece1.x = 240
+                            piece1.setZValue(1)
+                            square1[0].piece = None
+                            square2 = self.scene().items(QPointF(240, new_pos.y() + 10),
+                                                         Qt.IntersectsItemShape)
+                            square2[0].piece = piece1
+                            piece1.current_square = square2[0]
+
+
+
                 self.x = new_pos.x()
                 self.y = new_pos.y()
                 # Zapisuje referencję do pola, na którym się znajduje
                 self.scene().removeItem(square.piece)
                 square.piece = self
                 # self.change_player()
+                self.has_moved = True
             else:
                 self.setPos(self.x, self.y)
                 # square.piece = self
@@ -271,11 +304,54 @@ class ChessPiece(QGraphicsPixmapItem):
                 if not self.is_square_occupied((col + 1) * self.square_size, row * self.square_size) \
                         or self.is_square_occupied((col + 1) * self.square_size, row * self.square_size) != self.color:
                     moves.append(((col + 1) * self.square_size, row * self.square_size))
+            if self.color == "white":
+                items = self.scene().items(QPointF(570, 570))
+                for item in items:
+                    if isinstance(item, ChessSquare):
+                        piece = item.piece
+                        if self.is_castling_allowed(piece):
+                            moves.append((col * self.square_size + 160, row * self.square_size))
+                items2 = self.scene().items(QPointF(10, 570))
+                for item in items2:
+                    if isinstance(item, ChessSquare):
+                        piece = item.piece
+                        if self.is_castling_allowed(piece):
+                            moves.append((col * self.square_size - 160, row * self.square_size))
+            else:
+                items = self.scene().items(QPointF(570, 10))
+                for item in items:
+                    if isinstance(item, ChessSquare):
+                        piece = item.piece
+                        if self.is_castling_allowed(piece):
+                            moves.append((col * self.square_size + 160, row * self.square_size))
+                items2 = self.scene().items(QPointF(10, 10))
+                for item in items2:
+                    if isinstance(item, ChessSquare):
+                        piece = item.piece
+                        if self.is_castling_allowed(piece):
+                            moves.append((col * self.square_size - 160, row * self.square_size))
+                # if self.is_castling_allowed():
+                #     moves.append()
         for mov in moves:
             if self.is_square_occupiedv3(*mov) == "king":
                 moves.remove(mov)
         return moves
 
+    def is_castling_allowed(self, rook):
+        if self.has_moved or rook.has_moved:
+            return False
+        x1, y1 = self.scenePos().x(), self.scenePos().y()
+        x2, y2 = rook.scenePos().x(), rook.scenePos().y()
+        if x1 < x2:  # kingside castling
+            if any(self.is_square_occupiedv2(x, y) for x, y in [(x1 + 80, y1), (x1 + 160, y1)]):
+                return False
+        else:  # queenside castling
+            if any(self.is_square_occupiedv2(x, y) for x, y in [(x1 - 80, y1), (x1 - 160, y1), (x1 - 240, y1)]):
+                return False
+        # # Check if the king is not in check and won't be in check after the move
+        # if self.is_in_check() or self.is_in_check_after_move(x2, y2):
+        #     return False
+        return True
     def highlight_moves(self):
         self.old_colors = []
         for move in self.possible_moves:

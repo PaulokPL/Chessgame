@@ -17,6 +17,9 @@ class ChessBoard(QGraphicsScene):
         self.white_pieces = []
         self.black_pieces = []
         self.current_player = "white"
+        self.line_edit = QLineEdit()  # dodajemy pole QLineEdit
+        self.line_edit.setGeometry(50, 700, 200, 30)
+
         self.addLabels()  # dodajemy etykiety do planszy
         QResource.registerResource("chess_pieces.qrc")
 
