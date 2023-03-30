@@ -2,7 +2,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from chess_square import ChessSquare
-
+from promotiondialog import PromotionDialog
 
 
 class ChessPiece(QGraphicsPixmapItem):
@@ -114,6 +114,8 @@ class ChessPiece(QGraphicsPixmapItem):
                                 square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() - 60), Qt.IntersectsItemShape)
                                 self.scene().removeItem(square1[0].piece)
                                 square1[0].piece = None
+                    if new_pos.y() == 0 or new_pos.y() == 560:
+                        self.pop_up_window()
 
                 self.x = new_pos.x()
                 self.y = new_pos.y()
@@ -137,6 +139,43 @@ class ChessPiece(QGraphicsPixmapItem):
             # Resetuje stan
             self.selected = False
             self.setOpacity(1.0)
+
+
+    def pop_up_window(self):
+        app = QApplication.instance()
+        if not app:
+            app = QApplication([])
+        dialog = PromotionDialog()
+        if dialog.exec_():
+            selected_piece = dialog.get_selected_piece()
+        if self.color == "white":
+            if selected_piece == "queen":
+                self.piece_type = selected_piece
+                self.setPixmap(QPixmap(":/chess_pieces/icons/white_queen.png").scaled(self.square_size, self.square_size))
+            elif selected_piece == "bishop":
+                self.piece_type = selected_piece
+                self.setPixmap(QPixmap(":/chess_pieces/icons/white_bishop.png").scaled(self.square_size, self.square_size))
+            elif selected_piece == "rook":
+                self.piece_type = selected_piece
+                self.setPixmap(
+                    QPixmap(":/chess_pieces/icons/white_rook.png").scaled(self.square_size, self.square_size))
+            else:
+                self.piece_type = selected_piece
+                self.setPixmap(QPixmap(":/chess_pieces/icons/white_knight.png").scaled(self.square_size, self.square_size))
+        else:
+            if selected_piece == "queen":
+                self.piece_type = selected_piece
+                self.setPixmap(QPixmap(":/chess_pieces/icons/black_queen.png").scaled(self.square_size, self.square_size))
+            elif selected_piece == "bishop":
+                self.piece_type = selected_piece
+                self.setPixmap(QPixmap(":/chess_pieces/icons/black_bishop.png").scaled(self.square_size, self.square_size))
+            elif selected_piece == "rook":
+                self.piece_type = selected_piece
+                self.setPixmap(QPixmap(":/chess_pieces/icons/black_rook.png").scaled(self.square_size, self.square_size))
+            else:
+                self.piece_type = selected_piece
+                self.setPixmap(QPixmap(":/chess_pieces/icons/black_knight.png").scaled(self.square_size, self.square_size))
+
     def get_possible_moves(self):
         x = self.scenePos().x()
         y = self.scenePos().y()
