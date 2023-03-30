@@ -22,8 +22,7 @@ class ChessPiece(QGraphicsPixmapItem):
         self.current_square = None
         self.old_colors = []
         self.has_moved = False
-        self.first_move = False
-        self.en_paissant = False
+        self.en_passant = False
 
 
 
@@ -65,7 +64,7 @@ class ChessPiece(QGraphicsPixmapItem):
                     square = item
                     break
             else:
-                # Pionek nie został przeciągnięty na żadne pole - resetuje stan
+                # Pionek nie został przeciągnięty na żadne pole-resetuje stan
                 self.selected = False
                 self.setOpacity(1.0)
                 self.setPos(self.x, self.y)
@@ -78,7 +77,7 @@ class ChessPiece(QGraphicsPixmapItem):
                 self.current_square.piece = None
                 self.current_square = square
                 self.setPos(new_pos)
-                if (self.piece_type == "king"):
+                if self.piece_type == "king":
                     if abs(self.x - new_pos.x()) > 90:
                         if new_pos.x() == 480:
                             square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
@@ -87,11 +86,9 @@ class ChessPiece(QGraphicsPixmapItem):
                             piece1.x = 400
                             piece1.setZValue(1)
                             square1[0].piece = None
-                            square2 = self.scene().items(QPointF(440, new_pos.y() + 10),
-                                                         Qt.IntersectsItemShape)
+                            square2 = self.scene().items(QPointF(440, new_pos.y() + 10), Qt.IntersectsItemShape)
                             square2[0].piece = piece1
                             piece1.current_square = square2[0]
-
                         else:
                             square1 = self.scene().items(QPointF(0, new_pos.y() + 10), Qt.IntersectsItemShape)
                             piece1 = square1[0].piece
@@ -99,12 +96,24 @@ class ChessPiece(QGraphicsPixmapItem):
                             piece1.x = 240
                             piece1.setZValue(1)
                             square1[0].piece = None
-                            square2 = self.scene().items(QPointF(240, new_pos.y() + 10),
-                                                         Qt.IntersectsItemShape)
+                            square2 = self.scene().items(QPointF(240, new_pos.y() + 10), Qt.IntersectsItemShape)
                             square2[0].piece = piece1
                             piece1.current_square = square2[0]
-
-
+                if self.piece_type == "pawn":
+                    if abs(new_pos.y() - self.y) > 90:
+                        self.en_passant = True
+                    else:
+                        self.en_passant = False
+                    if abs(new_pos.x() - self.x) > 60:
+                        if not self.is_square_occupiedv2(new_pos.x(), new_pos.y()):
+                            if self.color == "white":
+                                square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() + 90), Qt.IntersectsItemShape)
+                                self.scene().removeItem(square1[0].piece)
+                                square1[0].piece = None
+                            else:
+                                square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() - 60), Qt.IntersectsItemShape)
+                                self.scene().removeItem(square1[0].piece)
+                                square1[0].piece = None
 
                 self.x = new_pos.x()
                 self.y = new_pos.y()
@@ -134,18 +143,23 @@ class ChessPiece(QGraphicsPixmapItem):
         moves = []
         if self.piece_type == "pawn":
             if self.color == "white":
-                # pionek biały, może przesunąć się o jedno pole do przodu
+                # pionek biały może przesunąć się o jedno pole do przodu
                 square = self.collidingItems()[0]
                 row = square.row
                 if row == 6:
                     two_squares_forward = (x, y - 2*self.square_size)
                     if self.is_square_occupied(*two_squares_forward) is None and self.is_square_occupied(x, y - self.square_size) is None:
                         moves.append(two_squares_forward)
-                    # to pierwszy ruch pionka, może przesunąć się o dwa pola do przodu
+                    # to pierwszy ruch pionka może przesunąć się o dwa pola do przodu
                 one_square_forward = (x, y - self.square_size)
                 if self.is_square_occupied(*one_square_forward) is None:
                     moves.append(one_square_forward)
                 if square.col != 0:
+                    if self.is_square_occupiedv2(x - 80, y) and self.is_square_occupied(x - 80, y) is not square.piece.color:
+                        square1 = self.scene().items(QPointF(x - 80, y), Qt.IntersectsItemShape)
+                        piece1 = square1[0].piece
+                        if piece1.en_passant:
+                            moves.append((x - 80, y - 80))
                     left_diagonal_square = (x - 80, y - self.square_size)
                     if self.is_square_occupied(*left_diagonal_square) is not None and self.is_square_occupied(*left_diagonal_square) is not square.piece.color:
                         if self.is_square_occupiedv3(*left_diagonal_square) == 'king':
@@ -154,27 +168,46 @@ class ChessPiece(QGraphicsPixmapItem):
                             moves.append(left_diagonal_square)
 
                 if square.col != 7:
+                    if self.is_square_occupiedv2(x + 80, y) and self.is_square_occupied(x + 80,
+                                                                                        y) is not square.piece.color:
+                        square1 = self.scene().items(QPointF(x + 80, y), Qt.IntersectsItemShape)
+                        piece1 = square1[0].piece
+                        if piece1.en_passant:
+                            moves.append((x + 80, y - 80))
                     right_diagonal_square = (x + 80, y - self.square_size)
                     if self.is_square_occupied(*right_diagonal_square) is not None and self.is_square_occupied(*right_diagonal_square) is not square.piece.color:
                         moves.append(right_diagonal_square)
+
+
             else:
-                # pionek biały, może przesunąć się o jedno pole do przodu
+                # pionek biały może przesunąć się o jedno pole do przodu
                 square = self.collidingItems()[0]
                 row = square.row
                 if row == 1:
                     two_squares_forward = (x, y + 2 * self.square_size)
                     if self.is_square_occupied(*two_squares_forward) is None and self.is_square_occupied(x, y + self.square_size) is None:
                         moves.append(two_squares_forward)
-                    # to pierwszy ruch pionka, może przesunąć się o dwa pola do przodu
+                    # to pierwszy ruch pionka może przesunąć się o dwa pola do przodu
                 one_square_forward = (x, y + self.square_size)
                 if self.is_square_occupied(*one_square_forward) is None:
                     moves.append(one_square_forward)
                 if square.col != 0:
+                    if self.is_square_occupiedv2(x - 80, y) and self.is_square_occupied(x - 80, y) is not square.piece.color:
+                        square1 = self.scene().items(QPointF(x - 80, y), Qt.IntersectsItemShape)
+                        piece1 = square1[0].piece
+                        if piece1.en_passant:
+                            moves.append((x - 80, y + 80))
                     one_square = (x - 80, y + self.square_size)
                     if self.is_square_occupied(*one_square) is not None and self.is_square_occupied(
                             *one_square) is not square.piece.color:
                         moves.append(one_square)
                 if square.col != 7:
+                    if self.is_square_occupiedv2(x + 80, y) and self.is_square_occupied(x + 80,
+                                                                                        y) is not square.piece.color:
+                        square1 = self.scene().items(QPointF(x + 80, y), Qt.IntersectsItemShape)
+                        piece1 = square1[0].piece
+                        if piece1.en_passant:
+                            moves.append((x + 80, y + 80))
                     right_diagonal_square = (x + 80, y + self.square_size)
                     if self.is_square_occupied(*right_diagonal_square) is not None and self.is_square_occupied(
                             *right_diagonal_square) is not square.piece.color:
@@ -342,10 +375,10 @@ class ChessPiece(QGraphicsPixmapItem):
             return False
         x1, y1 = self.scenePos().x(), self.scenePos().y()
         x2, y2 = rook.scenePos().x(), rook.scenePos().y()
-        if x1 < x2:  # kingside castling
+        if x1 < x2:  # king side castling
             if any(self.is_square_occupiedv2(x, y) for x, y in [(x1 + 80, y1), (x1 + 160, y1)]):
                 return False
-        else:  # queenside castling
+        else:  # queen side castling
             if any(self.is_square_occupiedv2(x, y) for x, y in [(x1 - 80, y1), (x1 - 160, y1), (x1 - 240, y1)]):
                 return False
         # # Check if the king is not in check and won't be in check after the move
@@ -374,12 +407,21 @@ class ChessPiece(QGraphicsPixmapItem):
                     return square.piece.color
         return None
 
+    def is_square_occupiedv1(self, x, y):
+        items = self.scene().items(QPointF(x+10, y+10))
+        for item in items:
+            if isinstance(item, ChessSquare):
+                square = item
+                if square.piece is not None:
+                    return square.piece
+        return None
+
     def is_square_occupiedv2(self, x, y):
         items = self.scene().items(QPointF(x + 10, y + 10))
         for item in items:
             if isinstance(item, ChessSquare):
                 square = item
-                if square.piece != None:
+                if square.piece is not None:
                     return True
         return False
     def is_square_occupiedv3(self, x, y):
