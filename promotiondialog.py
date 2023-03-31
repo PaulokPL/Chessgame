@@ -14,7 +14,6 @@ class PromotionDialog(QDialog):
         label = QLabel("Choose a piece to promote to:")
         vbox.addWidget(label)
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
-        # hbox = QHBoxLayout()
 
         queen_btn = QPushButton("Queen")
         queen_btn.clicked.connect(lambda: self.set_selected_piece("queen"))
@@ -31,8 +30,6 @@ class PromotionDialog(QDialog):
         knight_btn = QPushButton("Knight")
         knight_btn.clicked.connect(lambda: self.set_selected_piece("knight"))
         vbox.addWidget(knight_btn)
-
-        # vbox.addLayout(hbox)
 
         self.setLayout(vbox)
         self.setWindowTitle("Promotion Dialog")

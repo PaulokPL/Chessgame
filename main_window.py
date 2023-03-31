@@ -1,4 +1,4 @@
-from szachownica import ChessBoard
+from chess_board import ChessBoard
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *

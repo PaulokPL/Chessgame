@@ -5,7 +5,7 @@ from PySide2.QtGui import QPixmap
 from PySide2.QtCore import QResource
 from piece import ChessPiece
 from chess_square import ChessSquare
-
+from PySide2.QtWidgets import QGraphicsProxyWidget, QVBoxLayout, QPushButton
 
 class ChessBoard(QGraphicsScene):
     def __init__(self, parent=None):
@@ -18,8 +18,17 @@ class ChessBoard(QGraphicsScene):
         self.black_pieces = []
         self.current_player = "white"
         self.line_edit = QLineEdit()  # dodajemy pole QLineEdit
-        self.line_edit.setGeometry(50, 700, 200, 30)
+        self.line_edit.setGeometry(100, 721, 300, 30)
+        self.button = QPushButton("Confirm")
+        self.button.setGeometry(410, 721, 150, 30)
 
+        # Create a QGraphicsProxyWidget and set its widget to the QLineEdit
+        lineEdit_proxy = QGraphicsProxyWidget()
+        lineEdit_proxy.setWidget(self.line_edit)
+        self.addItem(lineEdit_proxy)
+        button_proxy = QGraphicsProxyWidget()
+        button_proxy.setWidget(self.button)
+        self.addItem(button_proxy)
         self.addLabels()  # dodajemy etykiety do planszy
         QResource.registerResource("chess_pieces.qrc")
 
@@ -29,9 +38,9 @@ class ChessBoard(QGraphicsScene):
                 y = row * self.square_size
 
                 if (row + col) % 2 == 0:
-                    color = "white"#"#FFF"
+                    color = "white"
                 else:
-                    color = "grey" #"#555"
+                    color = "grey"
 
                 square = ChessSquare(x, y, self.square_size, color)
                 self.addItem(square)

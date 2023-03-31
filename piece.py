@@ -248,8 +248,8 @@ class ChessPiece(QGraphicsPixmapItem):
                         if piece1.en_passant:
                             moves.append((x + 80, y + 80))
                     right_diagonal_square = (x + 80, y + self.square_size)
-                    if self.is_square_occupied(*right_diagonal_square) is not None and self.is_square_occupied(
-                            *right_diagonal_square) is not square.piece.color:
+                    if self.is_square_occupied(*right_diagonal_square) is not None and \
+                            self.is_square_occupied(*right_diagonal_square) is not square.piece.color:
                         moves.append(right_diagonal_square)
         if self.piece_type == "rook" or self.piece_type == "queen":
             col = self.current_square.col
@@ -434,7 +434,7 @@ class ChessPiece(QGraphicsPixmapItem):
                 if isinstance(square, ChessSquare):
                     # zmień kolor pola, jeśli to możliwy ruch
                     self.old_colors.append(square.color)
-                    square.color = "lightgreen"
+                    square.color = "light green"
                     square.setBrush(QBrush(QColor(square.color)))
 
     def is_square_occupied(self, x, y):
@@ -447,7 +447,7 @@ class ChessPiece(QGraphicsPixmapItem):
         return None
 
     def is_square_occupiedv1(self, x, y):
-        items = self.scene().items(QPointF(x+10, y+10))
+        items = self.scene().items(QPointF(x + 10, y + 10))
         # for item in items:
         #     if isinstance(item, ChessSquare):
         square = items[0]
