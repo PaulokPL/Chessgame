@@ -21,7 +21,7 @@ class ChessBoard(QGraphicsScene):
         self.line_edit.setGeometry(100, 721, 300, 30)
         self.button = QPushButton("Confirm")
         self.button.setGeometry(410, 721, 150, 30)
-
+        self.button.clicked.connect(self.move_piece)
         # Create a QGraphicsProxyWidget and set its widget to the QLineEdit
         lineEdit_proxy = QGraphicsProxyWidget()
         lineEdit_proxy.setWidget(self.line_edit)
@@ -140,3 +140,43 @@ class ChessBoard(QGraphicsScene):
             text1.setFont(QFont("Arial", 16))
             text1.setPos(650, - i * 80 + 585)
             self.addItem(text1)
+    def move_piece(self):
+        notation = self.line_edit.text()
+        if not notation:
+            return
+        src = self.parse_notation(notation[:2])
+        dst = self.parse_notation(notation[2:])
+
+        new_tuple_src = tuple(val * self.square_size + 10 for val in src)
+        new_tuple_dst = tuple(val * self.square_size for val in dst)
+        new_tuple_dst_10 = tuple(val * self.square_size + 10 for val in dst)
+        src_square = self.items(QPointF(*new_tuple_src))
+        dst_square = self.items(QPointF(*new_tuple_dst_10))
+        piece = src_square[0].piece
+        if piece is not None:
+            piece.possible_moves = piece.get_possible_moves()
+            if new_tuple_dst in piece.possible_moves:
+                piece.apllication_movement(QPointF(*new_tuple_dst), dst_square[0])
+        self.line_edit.clear()
+
+
+
+    def parse_notation(self,notation):
+        file_map = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+        rank_map = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+
+        # Ensure that the notation is in the correct format
+        if len(notation) != 2:
+            raise ValueError("Invalid notation: {}".format(notation))
+
+        # Extract the file and rank from the notation
+        file = notation[0]
+        rank = notation[1]
+
+        # Convert the file and rank to indices
+        if file not in file_map or rank not in rank_map:
+            raise ValueError("Invalid notation: {}".format(notation))
+        x = file_map[file]
+        y = rank_map[rank]
+
+        return x, y

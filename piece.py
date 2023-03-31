@@ -71,61 +71,61 @@ class ChessPiece(QGraphicsPixmapItem):
                 return
             # Ustawia pozycję pionka na środek znalezionego pola
             new_pos = square.mapToScene(square.rect().center()) + QPointF(-40, -40)
-
-            if (new_pos.x(), new_pos.y()) in self.possible_moves:
-                # Ustawia pozycję pionka na środek znalezionego pola
-                self.current_square.piece = None
-                self.current_square = square
-                self.setPos(new_pos)
-                if self.piece_type == "king":
-                    if abs(self.x - new_pos.x()) > 90:
-                        if new_pos.x() == 480:
-                            square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
-                            piece1 = square1[0].piece
-                            piece1.setPos(400, piece1.y)
-                            piece1.x = 400
-                            piece1.setZValue(1)
-                            square1[0].piece = None
-                            square2 = self.scene().items(QPointF(440, new_pos.y() + 10), Qt.IntersectsItemShape)
-                            square2[0].piece = piece1
-                            piece1.current_square = square2[0]
-                        else:
-                            square1 = self.scene().items(QPointF(0, new_pos.y() + 10), Qt.IntersectsItemShape)
-                            piece1 = square1[0].piece
-                            piece1.setPos(240, piece1.y)
-                            piece1.x = 240
-                            piece1.setZValue(1)
-                            square1[0].piece = None
-                            square2 = self.scene().items(QPointF(240, new_pos.y() + 10), Qt.IntersectsItemShape)
-                            square2[0].piece = piece1
-                            piece1.current_square = square2[0]
-                if self.piece_type == "pawn":
-                    if abs(new_pos.y() - self.y) > 90:
-                        self.en_passant = True
-                    else:
-                        self.en_passant = False
-                    if abs(new_pos.x() - self.x) > 60:
-                        if not self.is_square_occupiedv2(new_pos.x(), new_pos.y()):
-                            if self.color == "white":
-                                square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() + 90), Qt.IntersectsItemShape)
-                                self.scene().removeItem(square1[0].piece)
-                                square1[0].piece = None
-                            else:
-                                square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() - 60), Qt.IntersectsItemShape)
-                                self.scene().removeItem(square1[0].piece)
-                                square1[0].piece = None
-                    if new_pos.y() == 0 or new_pos.y() == 560:
-                        self.pop_up_window()
-
-                self.x = new_pos.x()
-                self.y = new_pos.y()
-                # Zapisuje referencję do pola, na którym się znajduje
-                self.scene().removeItem(square.piece)
-                square.piece = self
-                # self.change_player()
-                self.has_moved = True
-            else:
-                self.setPos(self.x, self.y)
+            self.apllication_movement(new_pos, square)
+            # if (new_pos.x(), new_pos.y()) in self.possible_moves:
+            #     # Ustawia pozycję pionka na środek znalezionego pola
+            #     self.current_square.piece = None
+            #     self.current_square = square
+            #     self.setPos(new_pos)
+            #     if self.piece_type == "king":
+            #         if abs(self.x - new_pos.x()) > 90:
+            #             if new_pos.x() == 480:
+            #                 square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
+            #                 piece1 = square1[0].piece
+            #                 piece1.setPos(400, piece1.y)
+            #                 piece1.x = 400
+            #                 piece1.setZValue(1)
+            #                 square1[0].piece = None
+            #                 square2 = self.scene().items(QPointF(440, new_pos.y() + 10), Qt.IntersectsItemShape)
+            #                 square2[0].piece = piece1
+            #                 piece1.current_square = square2[0]
+            #             else:
+            #                 square1 = self.scene().items(QPointF(0, new_pos.y() + 10), Qt.IntersectsItemShape)
+            #                 piece1 = square1[0].piece
+            #                 piece1.setPos(240, piece1.y)
+            #                 piece1.x = 240
+            #                 piece1.setZValue(1)
+            #                 square1[0].piece = None
+            #                 square2 = self.scene().items(QPointF(240, new_pos.y() + 10), Qt.IntersectsItemShape)
+            #                 square2[0].piece = piece1
+            #                 piece1.current_square = square2[0]
+            #     if self.piece_type == "pawn":
+            #         if abs(new_pos.y() - self.y) > 90:
+            #             self.en_passant = True
+            #         else:
+            #             self.en_passant = False
+            #         if abs(new_pos.x() - self.x) > 60:
+            #             if not self.is_square_occupiedv2(new_pos.x(), new_pos.y()):
+            #                 if self.color == "white":
+            #                     square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() + 90), Qt.IntersectsItemShape)
+            #                     self.scene().removeItem(square1[0].piece)
+            #                     square1[0].piece = None
+            #                 else:
+            #                     square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() - 60), Qt.IntersectsItemShape)
+            #                     self.scene().removeItem(square1[0].piece)
+            #                     square1[0].piece = None
+            #         if new_pos.y() == 0 or new_pos.y() == 560:
+            #             self.pop_up_window()
+            #
+            #     self.x = new_pos.x()
+            #     self.y = new_pos.y()
+            #     # Zapisuje referencję do pola, na którym się znajduje
+            #     self.scene().removeItem(square.piece)
+            #     square.piece = self
+            #     # self.change_player()
+            #     self.has_moved = True
+            # else:
+            #     self.setPos(self.x, self.y)
                 # square.piece = self
             for move in self.possible_moves:
                 new_move = (move[0] + 10, move[1] + 10)
@@ -135,11 +135,70 @@ class ChessPiece(QGraphicsPixmapItem):
                         color = self.old_colors.pop(0)
                         square.color = color
                         square.setBrush(QBrush(QColor(color)))
-
             # Resetuje stan
             self.selected = False
             self.setOpacity(1.0)
 
+
+    def apllication_movement(self, new_pos, square):
+
+        if (new_pos.x(), new_pos.y()) in self.possible_moves:
+
+            # Ustawia pozycję pionka na środek znalezionego pola
+            self.current_square.piece = None
+            self.current_square = square
+            self.setPos(new_pos)
+            if self.piece_type == "king":
+                if abs(self.x - new_pos.x()) > 90:
+                    if new_pos.x() == 480:
+                        square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
+                        piece1 = square1[0].piece
+                        piece1.setPos(400, piece1.y)
+                        piece1.x = 400
+                        piece1.setZValue(1)
+                        square1[0].piece = None
+                        square2 = self.scene().items(QPointF(440, new_pos.y() + 10), Qt.IntersectsItemShape)
+                        square2[0].piece = piece1
+                        piece1.current_square = square2[0]
+                    else:
+                        square1 = self.scene().items(QPointF(0, new_pos.y() + 10), Qt.IntersectsItemShape)
+                        piece1 = square1[0].piece
+                        piece1.setPos(240, piece1.y)
+                        piece1.x = 240
+                        piece1.setZValue(1)
+                        square1[0].piece = None
+                        square2 = self.scene().items(QPointF(240, new_pos.y() + 10), Qt.IntersectsItemShape)
+                        square2[0].piece = piece1
+                        piece1.current_square = square2[0]
+            if self.piece_type == "pawn":
+                if abs(new_pos.y() - self.y) > 90:
+                    self.en_passant = True
+                else:
+                    self.en_passant = False
+                if abs(new_pos.x() - self.x) > 60:
+                    if not self.is_square_occupiedv2(new_pos.x(), new_pos.y()):
+                        if self.color == "white":
+                            square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() + 90),
+                                                         Qt.IntersectsItemShape)
+                            self.scene().removeItem(square1[0].piece)
+                            square1[0].piece = None
+                        else:
+                            square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() - 60),
+                                                         Qt.IntersectsItemShape)
+                            self.scene().removeItem(square1[0].piece)
+                            square1[0].piece = None
+                if new_pos.y() == 0 or new_pos.y() == 560:
+                    self.pop_up_window()
+
+            self.x = new_pos.x()
+            self.y = new_pos.y()
+            # Zapisuje referencję do pola, na którym się znajduje
+            self.scene().removeItem(square.piece)
+            square.piece = self
+            # self.change_player()
+            self.has_moved = True
+        else:
+            self.setPos(self.x, self.y)
 
     def pop_up_window(self):
         app = QApplication.instance()
