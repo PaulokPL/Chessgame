@@ -22,6 +22,8 @@ class ChessBoard(QGraphicsScene):
         self.button = QPushButton("Confirm")
         self.button.setGeometry(410, 721, 150, 30)
         self.button.clicked.connect(self.move_piece)
+        self.line_edit.returnPressed.connect(self.button.click)
+        self.line_edit.returnPressed.connect(self.line_edit.clear)
         # Create a QGraphicsProxyWidget and set its widget to the QLineEdit
         lineEdit_proxy = QGraphicsProxyWidget()
         lineEdit_proxy.setWidget(self.line_edit)
@@ -94,10 +96,10 @@ class ChessBoard(QGraphicsScene):
                     piece.current_square = square
                     square.piece = piece
                     self.addItem(piece)
-                    if player == "white":
-                        self.white_pieces.append(piece)
-                    else:
-                        self.black_pieces.append(piece)
+                    # if player == "white":
+                    self.white_pieces.append(piece)
+                    # else:
+                    #     self.black_pieces.append(piece)
                     # dodajemy element do tablicy
         # if self.board[0][0] is not None:
         #     print("Na pozycji (0, 0) znajduje się element")

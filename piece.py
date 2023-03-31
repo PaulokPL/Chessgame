@@ -23,6 +23,7 @@ class ChessPiece(QGraphicsPixmapItem):
         self.old_colors = []
         self.has_moved = False
         self.en_passant = False
+        self.check_moves = []
 
 
 
@@ -36,7 +37,8 @@ class ChessPiece(QGraphicsPixmapItem):
                 # Oblicza różnicę między pozycją myszy a pozycją pionka
                 self.offset = event.pos()
                 self.setZValue(1)
-                self.possible_moves = self.get_possible_moves()
+                self.possible_moves = self.moves_continue()
+
                 # print(self.possible_moves)
                 # if self.player == self.scene().current_player:
                 self.highlight_moves()
@@ -193,10 +195,13 @@ class ChessPiece(QGraphicsPixmapItem):
             self.x = new_pos.x()
             self.y = new_pos.y()
             # Zapisuje referencję do pola, na którym się znajduje
-            self.scene().removeItem(square.piece)
+            if square.piece is not None:
+                self.scene().removeItem(square.piece)
+                self.scene().white_pieces.remove(square.piece)
             square.piece = self
             # self.change_player()
             self.has_moved = True
+
         else:
             self.setPos(self.x, self.y)
 
@@ -260,10 +265,7 @@ class ChessPiece(QGraphicsPixmapItem):
                             moves.append((x - 80, y - 80))
                     left_diagonal_square = (x - 80, y - self.square_size)
                     if self.is_square_occupied(*left_diagonal_square) is not None and self.is_square_occupied(*left_diagonal_square) is not square.piece.color:
-                        if self.is_square_occupiedv3(*left_diagonal_square) == 'king':
-                            pass
-                        else:
-                            moves.append(left_diagonal_square)
+                        moves.append(left_diagonal_square)
 
                 if square.col != 7:
                     if self.is_square_occupiedv2(x + 80, y) and self.is_square_occupied(x + 80,
@@ -463,11 +465,30 @@ class ChessPiece(QGraphicsPixmapItem):
                             moves.append((col * self.square_size - 160, row * self.square_size))
                 # if self.is_castling_allowed():
                 #     moves.append()
-        for mov in moves:
-            if self.is_square_occupiedv3(*mov) == "king":
-                moves.remove(mov)
+
         return moves
 
+
+    def moves_continue(self):
+
+        possible_moves = self.get_possible_moves()
+        for mov in possible_moves:
+            if self.is_square_occupiedv3(*mov) == "king":
+                self.check_moves.append(mov)
+                possible_moves.remove(mov)
+        for pieces in self.scene().white_pieces:
+            if pieces.piece_type == "king" and pieces.color == self.color:
+                self.is_in_check(pieces.x, pieces.y)
+        return possible_moves
+
+
+
+    def is_in_check(self, x, y):
+        for pieces in self.scene().white_pieces:
+            if pieces.color != self.color:
+                print((x, y))
+                if (x, y) in pieces.get_possible_moves():
+                    print(pieces)
     def is_castling_allowed(self, rook):
         if self.has_moved or rook.has_moved:
             return False
