@@ -29,7 +29,7 @@ class ChessPiece(QGraphicsPixmapItem):
 
     def mousePressEvent(self, event):
         # Sprawdza, czy pionek został kliknięty przez gracza
-        # if self.scene().current_player == self.color:
+        if self.scene().current_player == self.color:
             if event.button() == Qt.LeftButton:
             # Jeśli tak, to ustawia jego stan jako "wybrany"
             #
@@ -559,8 +559,8 @@ class ChessPiece(QGraphicsPixmapItem):
             if any(self.is_square_occupiedv2(x, y) for x, y in [(x1 - 80, y1), (x1 - 160, y1), (x1 - 240, y1)]):
                 return False
         # # Check if the king is not in check and won't be in check after the move
-        # if self.is_in_check() or self.is_in_check_after_move(x2, y2):
-        #     return False
+        if self.is_in_check(x1, y1):
+            return False
         return True
     def highlight_moves(self):
         self.old_colors = []
