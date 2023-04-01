@@ -156,7 +156,7 @@ class ChessBoard(QGraphicsScene):
         dst_square = self.items(QPointF(*new_tuple_dst_10))
         piece = src_square[0].piece
         if piece is not None:
-            piece.possible_moves = piece.get_possible_moves()
+            piece.possible_moves = piece.moves_continue()
             if new_tuple_dst in piece.possible_moves:
                 piece.apllication_movement(QPointF(*new_tuple_dst), dst_square[0])
         self.line_edit.clear()

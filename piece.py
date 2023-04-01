@@ -482,30 +482,31 @@ class ChessPiece(QGraphicsPixmapItem):
         for pieces in self.scene().white_pieces:
             if pieces.piece_type== "king" and pieces.color == self.color:
                 if not self.is_in_check(pieces.x, pieces.y):
-                    # new_possible_moves = []
-                    # for move in possible_moves:
-                    #     something = False
-                    #     old_square = self.current_square
-                    #     self.current_square.piece = None
-                    #     new_move = (move[0] + 10, move[1] + 10)
-                    #     squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
-                    #     remember_new_square = squares[0].piece
-                    #     self.current_square = squares[0]
-                    #     if squares[0].piece is not None:
-                    #         something = True
-                    #         self.scene().white_pieces.remove(squares[0].piece)
-                    #     squares[0].piece = self
-                    #
-                    #     if not self.is_in_check(pieces.x, pieces.y):
-                    #         new_possible_moves.append(move)
-                    #     self.current_square.piece = None
-                    #     self.current_square = old_square
-                    #     self.current_square.piece = self
-                    #     squares[0].piece = remember_new_square
-                    #     if something == True:
-                    #         self.scene().white_pieces.append(squares[0].piece)
-                    # possible_moves = new_possible_moves
-                    return possible_moves
+                    new_possible_moves = []
+                    for move in possible_moves:
+                        old_square = self.current_square
+                        self.current_square.piece = None
+                        new_move = (move[0] + 10, move[1] + 10)
+                        squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
+                        remember_new_square = squares[0].piece
+                        self.current_square = squares[0]
+                        if squares[0].piece is not None:
+                            self.scene().white_pieces.remove(squares[0].piece)
+                        squares[0].piece = self
+                        if self.piece_type != "king":
+                            if not self.is_in_check(pieces.x, pieces.y):
+                                new_possible_moves.append(move)
+                        else:
+                            if not self.is_in_check(move[0], move[1]):
+                                new_possible_moves.append(move)
+                        self.current_square.piece = None
+                        self.current_square = old_square
+                        self.current_square.piece = self
+                        squares[0].piece = remember_new_square
+                        if squares[0].piece is not None:
+                            self.scene().white_pieces.append(squares[0].piece)
+                    possible_moves = new_possible_moves
+                    # return possible_moves
                 else:
                     new_possible_moves = []
                     for move in possible_moves:
@@ -521,8 +522,12 @@ class ChessPiece(QGraphicsPixmapItem):
                             self.scene().white_pieces.remove(squares[0].piece)
                         squares[0].piece = self
 
-                        if not self.is_in_check(pieces.x, pieces.y):
-                            new_possible_moves.append(move)
+                        if self.piece_type != "king":
+                            if not self.is_in_check(pieces.x, pieces.y):
+                                new_possible_moves.append(move)
+                        else:
+                            if not self.is_in_check(move[0], move[1]):
+                                new_possible_moves.append(move)
                         self.current_square.piece = None
                         self.current_square = old_square
                         self.current_square.piece = self
@@ -530,7 +535,7 @@ class ChessPiece(QGraphicsPixmapItem):
                         if something == True:
                             self.scene().white_pieces.append(squares[0].piece)
                     possible_moves = new_possible_moves
-                return possible_moves
+        return possible_moves
 
 
 
