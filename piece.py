@@ -530,12 +530,6 @@ class ChessPiece(QGraphicsPixmapItem):
             return square.piece.color
         return None
 
-    def is_square_occupiedv1(self):
-        for item in self.scene().items():
-            if isinstance(item, ChessSquare):
-                square = item
-                if square.piece is not None:
-                    pieces = square.piece
 
 
 
