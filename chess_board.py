@@ -6,11 +6,11 @@ from PySide2.QtCore import QResource
 from piece import ChessPiece
 from chess_square import ChessSquare
 from PySide2.QtWidgets import QGraphicsProxyWidget, QVBoxLayout, QPushButton
-
+from analog_clock import  AnalogClock
 class ChessBoard(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setSceneRect(-50, -50, 800, 800)
+        # self.setSceneRect(-50, -50, 900, 800)
         self.square_size = 80
         self.addRect(-80, -80, 800, 800, QPen(), QBrush(QColor("#c9b18b")))
         self.setBackgroundBrush(QBrush(QColor(162, 164, 168, 255)))
@@ -22,6 +22,10 @@ class ChessBoard(QGraphicsScene):
         self.button = QPushButton("Confirm")
         self.button.setGeometry(410, 721, 150, 30)
         self.button.clicked.connect(self.move_piece)
+        self.move_happened = False
+        self.button1 = QPushButton("Return")
+        self.button1.setGeometry(750, 300, 150, 30)
+        self.button1.clicked.connect(self.return_piece)
         self.line_edit.returnPressed.connect(self.button.click)
         self.line_edit.returnPressed.connect(self.line_edit.clear)
         # Create a QGraphicsProxyWidget and set its widget to the QLineEdit
@@ -31,7 +35,26 @@ class ChessBoard(QGraphicsScene):
         button_proxy = QGraphicsProxyWidget()
         button_proxy.setWidget(self.button)
         self.addItem(button_proxy)
+        button1_proxy = QGraphicsProxyWidget()
+        button1_proxy.setWidget(self.button1)
+        self.addItem(button1_proxy)
         self.addLabels()  # dodajemy etykiety do planszy
+
+
+        self.timer = QTimer()
+        self.timer.setInterval(1)  # czas odświeżania zegara w milisekundach
+        self.timer.timeout.connect(self.update_clock)
+        self.clock = QTime(0, 0, 0, 0)  # początkowy czas zegara
+        self.clock2 = QTime(0, 0, 0, 0)
+        self.analog_clock = AnalogClock(self.clock)
+        self.analog_clock.is_running = True
+        self.analog_clock2 = AnalogClock(self.clock2)
+        self.addItem(self.analog_clock)
+        self.addItem(self.analog_clock2)
+        self.analog_clock.setGeometry(750, 400, 200, 200)
+        self.analog_clock2.setGeometry(750, 50, 200, 200)
+        self.timer.start()
+
         QResource.registerResource("chess_pieces.qrc")
 
         for row in range(8):
@@ -96,13 +119,26 @@ class ChessBoard(QGraphicsScene):
                     piece.current_square = square
                     square.piece = piece
                     self.addItem(piece)
-                    # if player == "white":
                     self.white_pieces.append(piece)
-                    # else:
-                    #     self.black_pieces.append(piece)
-                    # dodajemy element do tablicy
-        # if self.board[0][0] is not None:
-        #     print("Na pozycji (0, 0) znajduje się element")
+
+    def update_clock(self):
+        if self.analog_clock.is_running:
+            self.clock = self.clock.addMSecs(1)
+            self.analog_clock.update_time(self.clock)
+        if self.analog_clock2.is_running:
+            self.clock2 = self.clock2.addMSecs(1)
+            self.analog_clock2.update_time(self.clock2)
+
+    def return_piece(self):
+        for item in self.items():
+            if isinstance(item, ChessPiece):
+                if item.old_xy !=(item.x, item.y):
+                    xy = tuple(val  + 10 for val in item.old_xy)
+                    # xy = QPointF(item.old_xy[0] + 10, item.old_xy[1] + 10)
+                    square1 = self.items(QPointF(*xy), Qt.IntersectsItemShape)
+                    item.apllication_movement(QPointF(*item.old_xy), square1[0])
+                    self.move_happened = False
+
     def changeBoardColor(self, color1, color2):
         for item in self.items():
             if isinstance(item, ChessSquare):
@@ -156,9 +192,10 @@ class ChessBoard(QGraphicsScene):
         dst_square = self.items(QPointF(*new_tuple_dst_10))
         piece = src_square[0].piece
         if piece is not None:
-            piece.possible_moves = piece.moves_continue()
-            if new_tuple_dst in piece.possible_moves:
-                piece.apllication_movement(QPointF(*new_tuple_dst), dst_square[0])
+            if piece.color == self.current_player:
+                piece.possible_moves = piece.moves_continue()
+                if new_tuple_dst in piece.possible_moves:
+                    piece.apllication_movement(QPointF(*new_tuple_dst), dst_square[0])
         self.line_edit.clear()
 
 

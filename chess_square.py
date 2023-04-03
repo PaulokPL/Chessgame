@@ -11,16 +11,3 @@ class ChessSquare(QGraphicsRectItem):
         self.y = y
         self.row = int(self.y / size)
         self.col = int(self.x / size)
-
-    # def set_piece(self, piece):
-    #     self.piece = piece
-        # piece.setPos(self.x, self.y)
-    #
-    # def remove_piece(self):
-    #     self.piece = None
-    #
-    # def row(self):
-    #     return self.y // self.rect().height()
-    #
-    # def col(self):
-    #     return self.x() // self.rect().width()
