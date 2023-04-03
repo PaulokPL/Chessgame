@@ -134,7 +134,6 @@ class ChessBoard(QGraphicsScene):
             if isinstance(item, ChessPiece):
                 if item.old_xy !=(item.x, item.y):
                     xy = tuple(val  + 10 for val in item.old_xy)
-                    # xy = QPointF(item.old_xy[0] + 10, item.old_xy[1] + 10)
                     square1 = self.items(QPointF(*xy), Qt.IntersectsItemShape)
                     item.apllication_movement(QPointF(*item.old_xy), square1[0])
                     self.move_happened = False

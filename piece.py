@@ -46,8 +46,6 @@ class ChessPiece(QGraphicsPixmapItem):
         # Sprawdza, czy pionek jest wybrany i przesuwa go na nową pozycję
         if self.selected:
             new_pos = event.scenePos() - self.offset
-            # if new_pos.x() < -10 or new_pos.y() < -10 or new_pos.x() + self.square_size > self.scene().width() + 10 or new_pos.y() + self.square_size > self.scene().height() + 10:
-            #     return
             self.setPos(new_pos)
 
     def mouseReleaseEvent(self, event):
@@ -159,7 +157,6 @@ class ChessPiece(QGraphicsPixmapItem):
                 self.scene().removeItem(square.piece)
 
             square.piece = self
-            # self.change_player()
             self.has_moved = True
 
 
@@ -257,7 +254,6 @@ class ChessPiece(QGraphicsPixmapItem):
                 if square2.col != 0:
 
                     if self.is_square_occupiedv2(x - 80, y):
-                    # print(self.is_square_occupiedv3(x - 80, y), "wiersz: ", row, " kolumna: ", square2.col)
                         if self.is_square_occupied(x - 80, y) is not square2.piece.color:
                             square1 = self.scene().items(QPointF(x - 80, y), Qt.IntersectsItemShape)
                             piece1 = square1[0].piece
@@ -268,7 +264,6 @@ class ChessPiece(QGraphicsPixmapItem):
                         if self.is_square_occupied(*one_square) is not square2.piece.color:
                             moves.append(one_square)
                 if square2.col != 7:
-                    # print("Sprawdzamy ",self.is_square_occupiedv3(x + 80, y), " na pozycji x:", x + 80, " y:", y)
                     if self.is_square_occupiedv2(x + 80, y):
                         if self.is_square_occupied(x + 80, y) is not square2.piece.color:
                             square1 = self.scene().items(QPointF(x + 80, y), Qt.IntersectsItemShape)
@@ -407,35 +402,21 @@ class ChessPiece(QGraphicsPixmapItem):
             if self.color == "white":
                 items = self.scene().items(QPointF(570, 570))
                 piece = items[0].piece
-                # for item in items:
-                #     if isinstance(item, ChessSquare):
-                #         piece = item.piece
                 if piece is not None and self.is_castling_allowed(piece):
                     moves.append((col * self.square_size + 160, row * self.square_size))
                 items2 = self.scene().items(QPointF(10, 570))
                 piece2 = items2[0].piece
-                # for item in items2:
-                #     if isinstance(item, ChessSquare):
-                #         piece = item.piece
                 if piece2 is not None and self.is_castling_allowed(piece2):
                     moves.append((col * self.square_size - 160, row * self.square_size))
             else:
                 items = self.scene().items(QPointF(570, 10))
                 piece = items[0].piece
-                # for item in items:
-                #     if isinstance(item, ChessSquare):
-                #         piece = item.piece
                 if piece is not None and self.is_castling_allowed(piece):
                     moves.append((col * self.square_size + 160, row * self.square_size))
                 items2 = self.scene().items(QPointF(10, 10))
                 piece2 = items2[0].piece
-                # for item in items2:
-                #     if isinstance(item, ChessSquare):
-                #         piece = item.piece
                 if piece2 is not None and self.is_castling_allowed(piece2):
                     moves.append((col * self.square_size - 160, row * self.square_size))
-                # if self.is_castling_allowed():
-                #     moves.append()
 
         return moves
 
@@ -476,7 +457,6 @@ class ChessPiece(QGraphicsPixmapItem):
                         if squares[0].piece is not None:
                             self.scene().white_pieces.append(squares[0].piece)
                     possible_moves = new_possible_moves
-                    # return possible_moves
                 else:
                     pieces.my_king_check = True
                     new_possible_moves = []
@@ -511,13 +491,6 @@ class ChessPiece(QGraphicsPixmapItem):
 
 
     def is_in_check(self, x, y):
-        # white_pieces = self.scene().white_pieces
-        # opponent_pieces = list(filter(lambda piece: piece.color != self.color, white_pieces))
-        # opponent_moves = list(map(lambda piece: piece.get_possible_moves(piece.x, piece.y), opponent_pieces))
-        # opponent_moves_flat = [move for moves in opponent_moves for move in moves]
-        #
-        # return (x, y) in opponent_moves_flat
-        # print(len(self.scene().white_pieces))
         for pieces in self.scene().white_pieces:
             if pieces.color != self.color:
                 if (x, y) in pieces.get_possible_moves(pieces.old_xy[0], pieces.old_xy[1]):
@@ -546,9 +519,6 @@ class ChessPiece(QGraphicsPixmapItem):
             new_move = (move[0] + 10, move[1] + 10 )
             squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
             square = squares[0]
-            # for square in squares:
-            #     if isinstance(square, ChessSquare):
-                    # zmień kolor pola, jeśli to możliwy ruch
             self.old_colors.append(square.color)
             square.color = "light green"
             square.setBrush(QBrush(QColor(square.color)))
@@ -571,16 +541,12 @@ class ChessPiece(QGraphicsPixmapItem):
 
     def is_square_occupiedv2(self, x, y):
         items = self.scene().items(QPointF(x + 10, y + 10))
-        # for item in items:
-        #     if isinstance(item, ChessSquare):
         square = items[0]
         if square.piece is not None:
             return True
         return False
     def is_square_occupiedv3(self, x, y):
         items = self.scene().items(QPointF(x+10, y+10))
-        # for item in items:
-        #     if isinstance(item, ChessSquare):
         square = items[0]
         if square.piece is not None:
             return square.piece.piece_type

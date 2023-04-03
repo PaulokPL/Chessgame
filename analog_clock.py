@@ -81,9 +81,7 @@ class AnalogClock(QGraphicsWidget):
                     if isinstance(item, ChessPiece):
                         if item.old_xy != (item.x, item.y):
                             move_hap = True
-                            # self.is_running = False
                             item.old_xy = (item.x, item.y)
-                            # item.is_square_occupiedv1()
 
                 if move_hap:
                     self.is_running = False
@@ -94,18 +92,3 @@ class AnalogClock(QGraphicsWidget):
                         self.scene().current_player = "white"
                         self.scene().analog_clock.is_running = True
                     self.scene().move_happened = False
-
-            # zatrzymanie czasu
-        #     self.is_running = False
-        #     if self.scene().current_player == "white":
-        #         self.scene().current_player = "black"
-        #         self.scene().analog_clock2.is_running = True
-        #     else:
-        #         self.scene().current_player = "white"
-        #         self.scene().analog_clock.is_running = True
-        # self.scene().move_happened = False
-            # if not self.scene().analog_clock2.is_running:
-            #     self.scene().analog_clock2.is_running = True
-            # else:
-            #     self.scene().analog_clock.is_running = True
-            # self.scene().analog_clock2.is_running = True
