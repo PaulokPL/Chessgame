@@ -318,7 +318,7 @@ class ChessPiece(QGraphicsPixmapItem):
                     break
                 moves.append(((col + i) * self.square_size, (row - i) * self.square_size))
                 i += 1
-            # ruchy w lewo i do góry
+            ## ruchy w lewo i do góry
             i = 1
             while col - i >= 0 and row - i >= 0:
                 if self.is_square_occupiedv2((col - i) * self.square_size, (row - i) * self.square_size):
