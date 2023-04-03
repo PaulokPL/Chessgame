@@ -426,9 +426,9 @@ class ChessPiece(QGraphicsPixmapItem):
         y = self.scenePos().y()
         possible_moves = self.get_possible_moves(x, y)
         possible_moves = [mov for mov in possible_moves if self.is_square_occupiedv3(*mov) != "king"]
-        for mov in possible_moves:
-            if self.is_square_occupiedv3(*mov) == "king":
-                possible_moves.remove(mov)
+        # for mov in possible_moves:
+        #     if self.is_square_occupiedv3(*mov) == "king":
+        #         possible_moves.remove(mov)
         for pieces in self.scene().white_pieces:
             if pieces.piece_type== "king" and pieces.color == self.color:
                 if not self.is_in_check(pieces.x, pieces.y):

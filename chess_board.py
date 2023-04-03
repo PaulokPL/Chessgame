@@ -23,9 +23,9 @@ class ChessBoard(QGraphicsScene):
         self.button.setGeometry(410, 721, 150, 30)
         self.button.clicked.connect(self.move_piece)
         self.move_happened = False
-        self.button1 = QPushButton("Return")
-        self.button1.setGeometry(750, 300, 150, 30)
-        self.button1.clicked.connect(self.return_piece)
+        # self.button1 = QPushButton("Return")
+        # self.button1.setGeometry(750, 300, 150, 30)
+        # self.button1.clicked.connect(self.return_piece)
         self.line_edit.returnPressed.connect(self.button.click)
         self.line_edit.returnPressed.connect(self.line_edit.clear)
         # Create a QGraphicsProxyWidget and set its widget to the QLineEdit
@@ -35,10 +35,11 @@ class ChessBoard(QGraphicsScene):
         button_proxy = QGraphicsProxyWidget()
         button_proxy.setWidget(self.button)
         self.addItem(button_proxy)
-        button1_proxy = QGraphicsProxyWidget()
-        button1_proxy.setWidget(self.button1)
-        self.addItem(button1_proxy)
+        # button1_proxy = QGraphicsProxyWidget()
+        # button1_proxy.setWidget(self.button1)
+        # self.addItem(button1_proxy)
         self.addLabels()  # dodajemy etykiety do planszy
+        self.label = QLabel("Chess notation in format")
 
 
         self.timer = QTimer()
@@ -129,14 +130,14 @@ class ChessBoard(QGraphicsScene):
             self.clock2 = self.clock2.addMSecs(1)
             self.analog_clock2.update_time(self.clock2)
 
-    def return_piece(self):
-        for item in self.items():
-            if isinstance(item, ChessPiece):
-                if item.old_xy !=(item.x, item.y):
-                    xy = tuple(val  + 10 for val in item.old_xy)
-                    square1 = self.items(QPointF(*xy), Qt.IntersectsItemShape)
-                    item.apllication_movement(QPointF(*item.old_xy), square1[0])
-                    self.move_happened = False
+    # def return_piece(self):
+    #     for item in self.items():
+    #         if isinstance(item, ChessPiece):
+    #             if item.old_xy !=(item.x, item.y):
+    #                 xy = tuple(val  + 10 for val in item.old_xy)
+    #                 square1 = self.items(QPointF(*xy), Qt.IntersectsItemShape)
+    #                 item.apllication_movement(QPointF(*item.old_xy), square1[0])
+    #                 self.move_happened = False
 
     def changeBoardColor(self, color1, color2):
         for item in self.items():
