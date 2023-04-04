@@ -10,14 +10,14 @@ from analog_clock import  AnalogClock
 class ChessBoard(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
-        # self.setSceneRect(-50, -50, 900, 800)
+        self.setSceneRect(-50, -50, 900, 800)
         self.square_size = 80
         self.addRect(-80, -80, 800, 800, QPen(), QBrush(QColor("#c9b18b")))
         self.setBackgroundBrush(QBrush(QColor(162, 164, 168, 255)))
         self.white_pieces = []
         self.black_pieces = []
         self.current_player = "white"
-        self.line_edit = QLineEdit()  # dodajemy pole QLineEdit
+        self.line_edit = QLineEdit()
         self.line_edit.setGeometry(100, 721, 300, 30)
         self.button = QPushButton("Confirm")
         self.button.setGeometry(410, 721, 150, 30)
@@ -41,6 +41,10 @@ class ChessBoard(QGraphicsScene):
         self.addLabels()  # dodajemy etykiety do planszy
         self.label = QLabel("Chess notation in format")
 
+        self.white_move = True
+        self.black_move = False
+        self.white_clock = False
+        self.black_clock = False
 
         self.timer = QTimer()
         self.timer.setInterval(1)  # czas odświeżania zegara w milisekundach

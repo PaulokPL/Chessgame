@@ -76,19 +76,34 @@ class AnalogClock(QGraphicsWidget):
     def mousePressEvent(self, event):
         if self.is_running:
             if event.button() == Qt.LeftButton:
-                move_hap = False
-                for item in self.scene().items():
-                    if isinstance(item, ChessPiece):
-                        if item.old_xy != (item.x, item.y):
-                            move_hap = True
-                            item.old_xy = (item.x, item.y)
-
-                if move_hap:
+                if self.scene().white_clock and self.scene().analog_clock.is_running:
                     self.is_running = False
-                    if self.scene().current_player == "white":
-                        self.scene().current_player = "black"
-                        self.scene().analog_clock2.is_running = True
-                    else:
-                        self.scene().current_player = "white"
-                        self.scene().analog_clock.is_running = True
-                    self.scene().move_happened = False
+                    self.scene().current_player = "black"
+                    self.scene().black_move = True
+                    self.scene().white_clock = False
+                    self.scene().analog_clock2.is_running = True
+                elif self.scene().black_clock and self.scene().current_player == "black":
+                    self.is_running = False
+                    self.scene().current_player = "white"
+                    self.scene().white_move = True
+                    self.scene().black_clock = False
+                    self.scene().analog_clock.is_running = True
+
+        # if self.is_running:
+        #     if event.button() == Qt.LeftButton:
+        #         move_hap = False
+        #         for item in self.scene().items():
+        #             if isinstance(item, ChessPiece):
+        #                 if item.old_xy != (item.x, item.y):
+        #                     move_hap = True
+        #                     item.old_xy = (item.x, item.y)
+        #
+        #         if move_hap:
+        #             self.is_running = False
+        #             if self.scene().current_player == "white":
+        #                 self.scene().current_player = "black"
+        #                 self.scene().analog_clock2.is_running = True
+        #             else:
+        #                 self.scene().current_player = "white"
+        #                 self.scene().analog_clock.is_running = True
+        #             self.scene().move_happened = False
