@@ -24,7 +24,6 @@ class ChessPiece(QGraphicsPixmapItem):
         self.has_moved = False
         self.en_passant = False
         self.check_moves = []
-        self.old_xy = (x, y)
         self.my_king_check = False
 
     def mousePressEvent(self, event):
@@ -71,10 +70,9 @@ class ChessPiece(QGraphicsPixmapItem):
                         return
                     # Ustawia pozycję pionka na środek znalezionego pola
                     new_pos = square.mapToScene(square.rect().center()) + QPointF(-40, -40)
-                    self.old_xy = (self.x, self.y)
                     if (new_pos.x(), new_pos.y()) in self.possible_moves:
                         self.apllication_movement(new_pos, square)
-                        self.scene().move_happened = True
+                        # self.scene().move_happened = True
                     else:
                         self.setPos(self.x, self.y)
                     # Compute new moves
@@ -153,7 +151,6 @@ class ChessPiece(QGraphicsPixmapItem):
 
             self.x = new_pos.x()
             self.y = new_pos.y()
-            self.old_xy = (self.x, self.y)
             # Zapisuje referencję do pola, na którym się znajduje
             if square.piece is not None:
                 self.scene().white_pieces.remove(square.piece)
@@ -224,26 +221,26 @@ class ChessPiece(QGraphicsPixmapItem):
                     moves.append(one_square_forward)
                 if square2.col != 0:
                     if self.is_square_occupied_TF(x - 80, y):
-                        if self.is_square_occupied(x - 80, y) is not square2.piece.color:
+                        if self.is_square_occupied_C(x - 80, y) is not square2.piece.color:
                             square1 = self.scene().items(QPointF(x - 80, y), Qt.IntersectsItemShape)
                             piece1 = square1[0].piece
                             if piece1.en_passant:
                                 moves.append((x - 80, y - 80))
                     left_diagonal_square = (x - 80, y - self.square_size)
                     if self.is_square_occupied_TF(*left_diagonal_square):
-                        if self.is_square_occupied(*left_diagonal_square) is not square2.piece.color:
+                        if self.is_square_occupied_C(*left_diagonal_square) is not square2.piece.color:
                             moves.append(left_diagonal_square)
 
                 if square2.col != 7:
                     if self.is_square_occupied_TF(x + 80, y):
-                        if self.is_square_occupied(x + 80, y) is not square2.piece.color:
+                        if self.is_square_occupied_C(x + 80, y) is not square2.piece.color:
                             square1 = self.scene().items(QPointF(x + 80, y), Qt.IntersectsItemShape)
                             piece1 = square1[0].piece
                             if piece1.en_passant:
                                 moves.append((x + 80, y - 80))
                     right_diagonal_square = (x + 80, y - self.square_size)
-                    if self.is_square_occupied(*right_diagonal_square) is not None:
-                        if self.is_square_occupied(*right_diagonal_square) is not square2.piece.color:
+                    if self.is_square_occupied_C(*right_diagonal_square) is not None:
+                        if self.is_square_occupied_C(*right_diagonal_square) is not square2.piece.color:
                             moves.append(right_diagonal_square)
 
 
@@ -254,7 +251,7 @@ class ChessPiece(QGraphicsPixmapItem):
                 if row == 1:
                     two_squares_forward = (x, y + 2 * self.square_size)
                     if not self.is_square_occupied_TF(*two_squares_forward):
-                        if not self.is_square_occupied(x, y + self.square_size):
+                        if not self.is_square_occupied_C(x, y + self.square_size):
                             moves.append(two_squares_forward)
                     # to pierwszy ruch pionka może przesunąć się o dwa pola do przodu
                 one_square_forward = (x, y + self.square_size)
@@ -263,25 +260,25 @@ class ChessPiece(QGraphicsPixmapItem):
                 if square2.col != 0:
 
                     if self.is_square_occupied_TF(x - 80, y):
-                        if self.is_square_occupied(x - 80, y) is not square2.piece.color:
+                        if self.is_square_occupied_C(x - 80, y) is not square2.piece.color:
                             square1 = self.scene().items(QPointF(x - 80, y), Qt.IntersectsItemShape)
                             piece1 = square1[0].piece
                             if piece1.en_passant:
                                 moves.append((x - 80, y + 80))
                     one_square = (x - 80, y + self.square_size)
-                    if self.is_square_occupied(*one_square) is not None:
-                        if self.is_square_occupied(*one_square) is not square2.piece.color:
+                    if self.is_square_occupied_C(*one_square) is not None:
+                        if self.is_square_occupied_C(*one_square) is not square2.piece.color:
                             moves.append(one_square)
                 if square2.col != 7:
                     if self.is_square_occupied_TF(x + 80, y):
-                        if self.is_square_occupied(x + 80, y) is not square2.piece.color:
+                        if self.is_square_occupied_C(x + 80, y) is not square2.piece.color:
                             square1 = self.scene().items(QPointF(x + 80, y), Qt.IntersectsItemShape)
                             piece1 = square1[0].piece
                             if piece1.en_passant:
                                 moves.append((x + 80, y + 80))
                     right_diagonal_square = (x + 80, y + self.square_size)
-                    if self.is_square_occupied(*right_diagonal_square) is not None:
-                        if self.is_square_occupied(*right_diagonal_square) is not square2.piece.color:
+                    if self.is_square_occupied_C(*right_diagonal_square) is not None:
+                        if self.is_square_occupied_C(*right_diagonal_square) is not square2.piece.color:
                             moves.append(right_diagonal_square)
         if self.piece_type == "rook" or self.piece_type == "queen":
             col = self.current_square.col
@@ -289,28 +286,28 @@ class ChessPiece(QGraphicsPixmapItem):
             # ruchy do przodu
             for i in range(row - 1, -1, -1):
                 if self.is_square_occupied_TF(x, i * 80):
-                    if self.is_square_occupied(x, i * 80) is not self.color:
+                    if self.is_square_occupied_C(x, i * 80) is not self.color:
                         moves.append((x, i * self.square_size))
                     break
                 moves.append((x, i * self.square_size))
             # ruchy do tyłu
             for i in range(row + 1, 8):
                 if self.is_square_occupied_TF(x, i * 80):
-                    if self.is_square_occupied(x, i * 80) is not self.color:
+                    if self.is_square_occupied_C(x, i * 80) is not self.color:
                         moves.append((x, i * self.square_size))
                     break
                 moves.append((x, i * self.square_size))
             # ruchy w prawo
             for i in range(col + 1, 8):
                 if self.is_square_occupied_TF(i * 80, y):
-                    if self.is_square_occupied(i * 80, y) is not self.color:
+                    if self.is_square_occupied_C(i * 80, y) is not self.color:
                         moves.append((i * self.square_size, y))
                     break
                 moves.append((i * self.square_size, y))
             # ruchy w lewo
             for i in range(col - 1, -1, -1):
                 if self.is_square_occupied_TF(i * 80, y):
-                    if self.is_square_occupied(i * 80, y) is not self.color:
+                    if self.is_square_occupied_C(i * 80, y) is not self.color:
                         moves.append((i * self.square_size, y))
                     break
                 moves.append((i * self.square_size, y))
@@ -321,7 +318,7 @@ class ChessPiece(QGraphicsPixmapItem):
             i = 1
             while col + i < 8 and row - i >= 0:
                 if self.is_square_occupied_TF((col + i) * self.square_size, (row - i) * self.square_size):
-                    if self.is_square_occupied((col + i) * self.square_size,
+                    if self.is_square_occupied_C((col + i) * self.square_size,
                                                (row - i) * self.square_size) is not self.color:
                         moves.append(((col + i) * self.square_size, (row - i) * self.square_size))
                     break
@@ -331,7 +328,7 @@ class ChessPiece(QGraphicsPixmapItem):
             i = 1
             while col - i >= 0 and row - i >= 0:
                 if self.is_square_occupied_TF((col - i) * self.square_size, (row - i) * self.square_size):
-                    if self.is_square_occupied((col - i) * self.square_size, (row - i) * self.square_size) is not self.color:
+                    if self.is_square_occupied_C((col - i) * self.square_size, (row - i) * self.square_size) is not self.color:
                         moves.append(((col - i) * self.square_size, (row - i) * self.square_size))
                     break
                 moves.append(((col - i) * self.square_size, (row - i) * self.square_size))
@@ -341,7 +338,7 @@ class ChessPiece(QGraphicsPixmapItem):
             i = 1
             while col + i < 8 and row + i < 8:
                 if self.is_square_occupied_TF((col + i) * self.square_size, (row + i) * self.square_size):
-                    if self.is_square_occupied((col + i) * self.square_size, (row + i) * self.square_size) is not self.color:
+                    if self.is_square_occupied_C((col + i) * self.square_size, (row + i) * self.square_size) is not self.color:
                         moves.append(((col + i) * self.square_size, (row + i) * self.square_size))
                     break
                 moves.append(((col + i) * self.square_size, (row + i) * self.square_size))
@@ -351,7 +348,7 @@ class ChessPiece(QGraphicsPixmapItem):
             i = 1
             while col - i >= 0 and row + i < 8:
                 if self.is_square_occupied_TF((col - i) * self.square_size, (row + i) * self.square_size):
-                    if self.is_square_occupied((col - i) * self.square_size, (row + i) * self.square_size) is not self.color:
+                    if self.is_square_occupied_C((col - i) * self.square_size, (row + i) * self.square_size) is not self.color:
                         moves.append(((col - i) * self.square_size, (row + i) * self.square_size))
                     break
                 moves.append(((col - i) * self.square_size, (row + i) * self.square_size))
@@ -364,7 +361,7 @@ class ChessPiece(QGraphicsPixmapItem):
             for move in possible_moves:
                 if 0 <= move[0] < 8 and 0 <= move[1] < 8:
                     if self.is_square_occupied_TF(move[0] * self.square_size, move[1] * self.square_size):
-                        if self.is_square_occupied(move[0] * self.square_size, move[1] * self.square_size) is not self.color:
+                        if self.is_square_occupied_C(move[0] * self.square_size, move[1] * self.square_size) is not self.color:
                             moves.append((move[0] * self.square_size, move[1] * self.square_size))
                     else:
                         moves.append((move[0] * self.square_size, move[1] * self.square_size))
@@ -373,40 +370,40 @@ class ChessPiece(QGraphicsPixmapItem):
             row = self.current_square.row
             # ruchy do przodu
             if row > 0:
-                if not self.is_square_occupied(col * self.square_size, (row - 1) * self.square_size) \
-                        or self.is_square_occupied(col * self.square_size, (row - 1) * self.square_size) != self.color:
+                if not self.is_square_occupied_C(col * self.square_size, (row - 1) * self.square_size) \
+                        or self.is_square_occupied_C(col * self.square_size, (row - 1) * self.square_size) != self.color:
                     moves.append((col * self.square_size, (row - 1) * self.square_size))
                 # ruchy na ukos w górę
                 if col > 0:
-                    if not self.is_square_occupied((col - 1) * self.square_size, (row - 1) * self.square_size) \
-                            or self.is_square_occupied((col - 1) * self.square_size, (row - 1) * self.square_size) != self.color:
+                    if not self.is_square_occupied_C((col - 1) * self.square_size, (row - 1) * self.square_size) \
+                            or self.is_square_occupied_C((col - 1) * self.square_size, (row - 1) * self.square_size) != self.color:
                         moves.append(((col - 1) * self.square_size, (row - 1) * self.square_size))
                 if col < 7:
-                    if not self.is_square_occupied((col + 1) * self.square_size, (row - 1) * self.square_size) \
-                            or self.is_square_occupied((col + 1) * self.square_size, (row - 1) * self.square_size) != self.color:
+                    if not self.is_square_occupied_C((col + 1) * self.square_size, (row - 1) * self.square_size) \
+                            or self.is_square_occupied_C((col + 1) * self.square_size, (row - 1) * self.square_size) != self.color:
                         moves.append(((col + 1) * self.square_size, (row - 1) * self.square_size))
             # ruchy w dół
             if row < 7:
-                if not self.is_square_occupied(col * self.square_size, (row + 1) * self.square_size) \
-                        or self.is_square_occupied(col * self.square_size, (row + 1) * self.square_size) != self.color:
+                if not self.is_square_occupied_C(col * self.square_size, (row + 1) * self.square_size) \
+                        or self.is_square_occupied_C(col * self.square_size, (row + 1) * self.square_size) != self.color:
                     moves.append((col * self.square_size, (row + 1) * self.square_size))
                 # ruchy na ukos w dół
                 if col > 0:
-                    if not self.is_square_occupied((col - 1) * self.square_size, (row + 1) * self.square_size) \
-                            or self.is_square_occupied((col - 1) * self.square_size, (row + 1) * self.square_size) != self.color:
+                    if not self.is_square_occupied_C((col - 1) * self.square_size, (row + 1) * self.square_size) \
+                            or self.is_square_occupied_C((col - 1) * self.square_size, (row + 1) * self.square_size) != self.color:
                         moves.append(((col - 1) * self.square_size, (row + 1) * self.square_size))
                 if col < 7:
-                    if not self.is_square_occupied((col + 1) * self.square_size, (row + 1) * self.square_size) \
-                            or self.is_square_occupied((col + 1) * self.square_size, (row + 1) * self.square_size) != self.color:
+                    if not self.is_square_occupied_C((col + 1) * self.square_size, (row + 1) * self.square_size) \
+                            or self.is_square_occupied_C((col + 1) * self.square_size, (row + 1) * self.square_size) != self.color:
                         moves.append(((col + 1) * self.square_size, (row + 1) * self.square_size))
                 # ruchy na boki
             if col > 0:
-                if not self.is_square_occupied((col - 1) * self.square_size, row * self.square_size) \
-                        or self.is_square_occupied((col - 1) * self.square_size, row * self.square_size) != self.color:
+                if not self.is_square_occupied_C((col - 1) * self.square_size, row * self.square_size) \
+                        or self.is_square_occupied_C((col - 1) * self.square_size, row * self.square_size) != self.color:
                     moves.append(((col - 1) * self.square_size, row * self.square_size))
             if col < 7:
-                if not self.is_square_occupied((col + 1) * self.square_size, row * self.square_size) \
-                        or self.is_square_occupied((col + 1) * self.square_size, row * self.square_size) != self.color:
+                if not self.is_square_occupied_C((col + 1) * self.square_size, row * self.square_size) \
+                        or self.is_square_occupied_C((col + 1) * self.square_size, row * self.square_size) != self.color:
                     moves.append(((col + 1) * self.square_size, row * self.square_size))
             if self.color == "white":
                 items = self.scene().items(QPointF(570, 570))
@@ -434,7 +431,7 @@ class ChessPiece(QGraphicsPixmapItem):
         x = self.scenePos().x()
         y = self.scenePos().y()
         possible_moves = self.get_possible_moves(x, y)
-        possible_moves = [mov for mov in possible_moves if self.is_square_occupiedv3(*mov) != "king"]
+        possible_moves = [mov for mov in possible_moves if self.is_square_occupied_PT(*mov) != "king"]
         # for mov in possible_moves:
         #     if self.is_square_occupiedv3(*mov) == "king":
         #         possible_moves.remove(mov)
@@ -581,7 +578,7 @@ class ChessPiece(QGraphicsPixmapItem):
     def is_in_check(self, x, y):
         for pieces in self.scene().white_pieces:
             if pieces.color != self.color:
-                if (x, y) in pieces.get_possible_moves(pieces.old_xy[0], pieces.old_xy[1]):
+                if (x, y) in pieces.get_possible_moves(pieces.x, pieces.y):
                     return True
         return False
     def is_castling_allowed(self, rook):
@@ -608,7 +605,7 @@ class ChessPiece(QGraphicsPixmapItem):
             self.old_colors.append(square.color)
             square.color = "light green"
             square.setBrush(QBrush(QColor(square.color)))
-    def is_square_occupied(self, x, y):
+    def is_square_occupied_C(self, x, y):
         items = self.scene().items(QPointF(x+10, y+10))
         square = items[0]
         if square.piece is not None:
@@ -620,7 +617,7 @@ class ChessPiece(QGraphicsPixmapItem):
         if square.piece is not None:
             return True
         return False
-    def is_square_occupiedv3(self, x, y):
+    def is_square_occupied_PT(self, x, y):
         items = self.scene().items(QPointF(x+10, y+10))
         square = items[0]
         if square.piece is not None:

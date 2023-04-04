@@ -22,7 +22,6 @@ class ChessBoard(QGraphicsScene):
         self.button = QPushButton("Confirm")
         self.button.setGeometry(410, 721, 150, 30)
         self.button.clicked.connect(self.move_piece)
-        self.move_happened = False
         # self.button1 = QPushButton("Return")
         # self.button1.setGeometry(750, 300, 150, 30)
         # self.button1.clicked.connect(self.return_piece)
