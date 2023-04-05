@@ -36,11 +36,13 @@ class ChessBoard(QGraphicsScene):
         self.black_move = False
         self.white_clock = False
         self.black_clock = False
+        self.white_king = None
+        self.black_king = None
 
         self.timer = QTimer()
-        self.timer.setInterval(1)  # czas odświeżania zegara w milisekundach
+        self.timer.setInterval(1)
         self.timer.timeout.connect(self.update_clock)
-        self.clock = QTime(0, 0, 0, 0)  # początkowy czas zegara
+        self.clock = QTime(0, 0, 0, 0)
         self.clock2 = QTime(0, 0, 0, 0)
         self.analog_clock = AnalogClock(self.clock)
         self.analog_clock.is_running = True
@@ -112,6 +114,11 @@ class ChessBoard(QGraphicsScene):
                             piece_type = "pawn"
                             filename = ":/chess_pieces/icons/black_pawn.png"
                     piece = ChessPiece(x, y, self.square_size, color_piece, player, piece_type, filename)
+                    if piece.piece_type == "king":
+                        if piece.color == "white":
+                            self.white_king = piece
+                        else:
+                            self.black_king = piece
                     piece.current_square = square
                     square.piece = piece
                     self.addItem(piece)

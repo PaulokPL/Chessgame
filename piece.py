@@ -85,6 +85,10 @@ class ChessPiece(QGraphicsPixmapItem):
             self.setPos(new_pos)
             self.setZValue(1)
             if self.piece_type == "king":
+                if self.color == "white":
+                    self.scene().white_king = (new_pos.x(), new_pos.y())
+                else:
+                    self.scene().black_king = (new_pos.x(), new_pos.y())
                 if abs(self.x - new_pos.x()) > 90:
                     if new_pos.x() == 480:
                         square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
@@ -391,141 +395,143 @@ class ChessPiece(QGraphicsPixmapItem):
         y = self.scenePos().y()
         possible_moves = self.get_possible_moves(x, y)
         possible_moves = [mov for mov in possible_moves if self.is_square_occupied_PT(*mov) != "king"]
-        for pieces in self.scene().white_pieces:
-            if pieces.piece_type== "king" and pieces.color == self.color:
-                if not self.is_in_check(pieces.x, pieces.y):
-                    pieces.my_king_check = False
-                    new_possible_moves = []
-                    for move in possible_moves:
-                        if self.piece_type == "pawn" and abs(move[0] - self.x) > 60 and not self.is_square_occupied_TF(move[0], move[1]):
-                            if self.color == "white":
-                                old_square = self.current_square
-                                self.current_square.piece = None
-                                new_move = (move[0] + 10, move[1] + 10)
-                                squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
-                                self.current_square = squares[0]
-                                squares[0].piece = self
-                                square5 = self.scene().items(QPointF(move[0] + 10, move[1] + 90),
-                                                             Qt.IntersectsItemShape)
-                                remember = square5[0].piece
-                                self.scene().white_pieces.remove(square5[0].piece)
-                                square5[0].piece = None
-                                if not self.is_in_check(pieces.x, pieces.y):
-                                    new_possible_moves.append(move)
-                                square5[0].piece = remember
-                                self.scene().white_pieces.append(square5[0].piece)
-                                self.current_square.piece = None
-                                self.current_square = old_square
-                                self.current_square.piece = self
-                            else:
-                                old_square = self.current_square
-                                self.current_square.piece = None
-                                new_move = (move[0] + 10, move[1] + 10)
-                                squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
-                                self.current_square = squares[0]
-                                squares[0].piece = self
-                                square5 = self.scene().items(QPointF(move[0] + 10, move[1] - 60),
-                                                             Qt.IntersectsItemShape)
-                                remember = square5[0].piece
-                                self.scene().white_pieces.remove(square5[0].piece)
-                                square5[0].piece = None
-                                if not self.is_in_check(pieces.x, pieces.y):
-                                    new_possible_moves.append(move)
-                                square5[0].piece = remember
-                                self.scene().white_pieces.append(square5[0].piece)
-                                self.current_square.piece = None
-                                self.current_square = old_square
-                                self.current_square.piece = self
-                        else:
-                            old_square = self.current_square
-                            self.current_square.piece = None
-                            new_move = (move[0] + 10, move[1] + 10)
-                            squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
-                            remember_new_square = squares[0].piece
-                            self.current_square = squares[0]
-                            if remember_new_square is not None:
-                                self.scene().white_pieces.remove(squares[0].piece)
-                            squares[0].piece = self
-                            if self.piece_type != "king":
-                                if not self.is_in_check(pieces.x, pieces.y):
-                                    new_possible_moves.append(move)
-                            else:
-                                if not self.is_in_check(move[0], move[1]):
-                                    new_possible_moves.append(move)
-                            self.current_square.piece = None
-                            self.current_square = old_square
-                            self.current_square.piece = self
-                            squares[0].piece = remember_new_square
-                            if squares[0].piece is not None:
-                                self.scene().white_pieces.append(squares[0].piece)
-                    possible_moves = new_possible_moves
+        if self.color == "white":
+            pieces = self.scene().white_king
+        else:
+            pieces = self.scene().black_king
+        if not self.is_in_check(pieces.x, pieces.y):
+            pieces.my_king_check = False
+            new_possible_moves = []
+            for move in possible_moves:
+                if self.piece_type == "pawn" and abs(move[0] - self.x) > 60 and not self.is_square_occupied_TF(move[0], move[1]):
+                    if self.color == "white":
+                        old_square = self.current_square
+                        self.current_square.piece = None
+                        new_move = (move[0] + 10, move[1] + 10)
+                        squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
+                        self.current_square = squares[0]
+                        squares[0].piece = self
+                        square5 = self.scene().items(QPointF(move[0] + 10, move[1] + 90),
+                                                     Qt.IntersectsItemShape)
+                        remember = square5[0].piece
+                        self.scene().white_pieces.remove(square5[0].piece)
+                        square5[0].piece = None
+                        if not self.is_in_check(pieces.x, pieces.y):
+                            new_possible_moves.append(move)
+                        square5[0].piece = remember
+                        self.scene().white_pieces.append(square5[0].piece)
+                        self.current_square.piece = None
+                        self.current_square = old_square
+                        self.current_square.piece = self
+                    else:
+                        old_square = self.current_square
+                        self.current_square.piece = None
+                        new_move = (move[0] + 10, move[1] + 10)
+                        squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
+                        self.current_square = squares[0]
+                        squares[0].piece = self
+                        square5 = self.scene().items(QPointF(move[0] + 10, move[1] - 60),
+                                                     Qt.IntersectsItemShape)
+                        remember = square5[0].piece
+                        self.scene().white_pieces.remove(square5[0].piece)
+                        square5[0].piece = None
+                        if not self.is_in_check(pieces.x, pieces.y):
+                            new_possible_moves.append(move)
+                        square5[0].piece = remember
+                        self.scene().white_pieces.append(square5[0].piece)
+                        self.current_square.piece = None
+                        self.current_square = old_square
+                        self.current_square.piece = self
                 else:
-                    pieces.my_king_check = True
-                    new_possible_moves = []
-                    for move in possible_moves:
-                        if self.piece_type == "pawn" and abs(move[0] - self.x) > 60 and not self.is_square_occupied_TF(move[0], move[1]):
-                            if self.color == "white":
-                                old_square = self.current_square
-                                self.current_square.piece = None
-                                new_move = (move[0] + 10, move[1] + 10)
-                                squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
-                                self.current_square = squares[0]
-                                squares[0].piece = self
-                                square5 = self.scene().items(QPointF(move[0] + 10, move[1] + 90),
-                                                             Qt.IntersectsItemShape)
-                                remember = square5[0].piece
-                                self.scene().white_pieces.remove(square5[0].piece)
-                                square5[0].piece = None
-                                if not self.is_in_check(pieces.x, pieces.y):
-                                    new_possible_moves.append(move)
-                                square5[0].piece = remember
-                                self.scene().white_pieces.append(square5[0].piece)
-                                self.current_square.piece = None
-                                self.current_square = old_square
-                                self.current_square.piece = self
-                            else:
-                                old_square = self.current_square
-                                self.current_square.piece = None
-                                new_move = (move[0] + 10, move[1] + 10)
-                                squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
-                                self.current_square = squares[0]
-                                squares[0].piece = self
-                                square5 = self.scene().items(QPointF(move[0] + 10, move[1] - 60),
-                                                             Qt.IntersectsItemShape)
-                                remember = square5[0].piece
-                                self.scene().white_pieces.remove(square5[0].piece)
-                                square5[0].piece = None
-                                if not self.is_in_check(pieces.x, pieces.y):
-                                    new_possible_moves.append(move)
-                                square5[0].piece = remember
-                                self.scene().white_pieces.append(square5[0].piece)
-                                self.current_square.piece = None
-                                self.current_square = old_square
-                                self.current_square.piece = self
-                        else:
-                            old_square = self.current_square
-                            self.current_square.piece = None
-                            new_move = (move[0] + 10, move[1] + 10)
-                            squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
-                            remember_new_square = squares[0].piece
-                            self.current_square = squares[0]
-                            if squares[0].piece is not None:
-                                self.scene().white_pieces.remove(squares[0].piece)
-                            squares[0].piece = self
+                    old_square = self.current_square
+                    self.current_square.piece = None
+                    new_move = (move[0] + 10, move[1] + 10)
+                    squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
+                    remember_new_square = squares[0].piece
+                    self.current_square = squares[0]
+                    if remember_new_square is not None:
+                        self.scene().white_pieces.remove(squares[0].piece)
+                    squares[0].piece = self
+                    if self.piece_type != "king":
+                        if not self.is_in_check(pieces.x, pieces.y):
+                            new_possible_moves.append(move)
+                    else:
+                        if not self.is_in_check(move[0], move[1]):
+                            new_possible_moves.append(move)
+                    self.current_square.piece = None
+                    self.current_square = old_square
+                    self.current_square.piece = self
+                    squares[0].piece = remember_new_square
+                    if squares[0].piece is not None:
+                        self.scene().white_pieces.append(squares[0].piece)
+            possible_moves = new_possible_moves
+        else:
+            pieces.my_king_check = True
+            new_possible_moves = []
+            for move in possible_moves:
+                if self.piece_type == "pawn" and abs(move[0] - self.x) > 60 and not self.is_square_occupied_TF(move[0], move[1]):
+                    if self.color == "white":
+                        old_square = self.current_square
+                        self.current_square.piece = None
+                        new_move = (move[0] + 10, move[1] + 10)
+                        squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
+                        self.current_square = squares[0]
+                        squares[0].piece = self
+                        square5 = self.scene().items(QPointF(move[0] + 10, move[1] + 90),
+                                                     Qt.IntersectsItemShape)
+                        remember = square5[0].piece
+                        self.scene().white_pieces.remove(square5[0].piece)
+                        square5[0].piece = None
+                        if not self.is_in_check(pieces.x, pieces.y):
+                            new_possible_moves.append(move)
+                        square5[0].piece = remember
+                        self.scene().white_pieces.append(square5[0].piece)
+                        self.current_square.piece = None
+                        self.current_square = old_square
+                        self.current_square.piece = self
+                    else:
+                        old_square = self.current_square
+                        self.current_square.piece = None
+                        new_move = (move[0] + 10, move[1] + 10)
+                        squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
+                        self.current_square = squares[0]
+                        squares[0].piece = self
+                        square5 = self.scene().items(QPointF(move[0] + 10, move[1] - 60),
+                                                     Qt.IntersectsItemShape)
+                        remember = square5[0].piece
+                        self.scene().white_pieces.remove(square5[0].piece)
+                        square5[0].piece = None
+                        if not self.is_in_check(pieces.x, pieces.y):
+                            new_possible_moves.append(move)
+                        square5[0].piece = remember
+                        self.scene().white_pieces.append(square5[0].piece)
+                        self.current_square.piece = None
+                        self.current_square = old_square
+                        self.current_square.piece = self
+                else:
+                    old_square = self.current_square
+                    self.current_square.piece = None
+                    new_move = (move[0] + 10, move[1] + 10)
+                    squares = self.scene().items(QPointF(*new_move), Qt.IntersectsItemShape)
+                    remember_new_square = squares[0].piece
+                    self.current_square = squares[0]
+                    if squares[0].piece is not None:
+                        self.scene().white_pieces.remove(squares[0].piece)
+                    squares[0].piece = self
 
-                            if self.piece_type != "king":
-                                if not self.is_in_check(pieces.x, pieces.y):
-                                    new_possible_moves.append(move)
-                            else:
-                                if not self.is_in_check(move[0], move[1]):
-                                    new_possible_moves.append(move)
-                            self.current_square.piece = None
-                            self.current_square = old_square
-                            self.current_square.piece = self
-                            squares[0].piece = remember_new_square
-                            if squares[0].piece is not None:
-                                self.scene().white_pieces.append(squares[0].piece)
-                    possible_moves = new_possible_moves
+                    if self.piece_type != "king":
+                        if not self.is_in_check(pieces.x, pieces.y):
+                            new_possible_moves.append(move)
+                    else:
+                        if not self.is_in_check(move[0], move[1]):
+                            new_possible_moves.append(move)
+                    self.current_square.piece = None
+                    self.current_square = old_square
+                    self.current_square.piece = self
+                    squares[0].piece = remember_new_square
+                    if squares[0].piece is not None:
+                        self.scene().white_pieces.append(squares[0].piece)
+            possible_moves = new_possible_moves
         return possible_moves
 
     def is_in_check(self, x, y):
