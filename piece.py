@@ -43,22 +43,16 @@ class ChessPiece(QGraphicsPixmapItem):
     def mouseReleaseEvent(self, event):
             if self.scene().current_player == self.color:
                 if event.button() == Qt.LeftButton:
-                    if self.sceneBoundingRect().intersects(self.scene().sceneRect()) == False:
+                    if not self.sceneBoundingRect().intersects(self.scene().sceneRect()):
                         self.selected = False
                         self.setOpacity(1.0)
                         self.setPos(self.x, self.y)
                         return
 
-                    # colliding_items = self.collidingItems()
                     squares = [item for item in self.collidingItems() if isinstance(item, ChessSquare)]
                     if squares:
                         square = squares[0]
-                    # for item in self.collidingItems():
-                    #     if isinstance(item, ChessSquare):
-                    #         square = item
-                    #         break
                     else:
-
                         self.selected = False
                         self.setOpacity(1.0)
                         self.setPos(self.x, self.y)
@@ -78,11 +72,8 @@ class ChessPiece(QGraphicsPixmapItem):
 
                     colors = self.old_colors[:len(squares)]
                     self.old_colors = self.old_colors[len(squares):]
-                    # for square, color in zip(squares, colors):
-                    #     square.color = color
-                    #     square.setBrush(QBrush(QColor(color)))
                     list(map(lambda square, color: (
-                    setattr(square, 'color', color), square.setBrush(QBrush(QColor(color)))), squares, colors))
+                        setattr(square, 'color', color), square.setBrush(QBrush(QColor(color)))), squares, colors))
 
                     self.selected = False
                     self.setOpacity(1.0)
