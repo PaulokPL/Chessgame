@@ -1,11 +1,10 @@
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
-from PySide2.QtGui import QPixmap
 from PySide2.QtCore import QResource
 from piece import ChessPiece
 from chess_square import ChessSquare
-from PySide2.QtWidgets import QGraphicsProxyWidget, QVBoxLayout, QPushButton
+from PySide2.QtWidgets import QGraphicsProxyWidget, QPushButton
 from analog_clock import  AnalogClock
 class ChessBoard(QGraphicsScene):
     def __init__(self, parent=None):
@@ -22,23 +21,16 @@ class ChessBoard(QGraphicsScene):
         self.button = QPushButton("Confirm")
         self.button.setGeometry(410, 721, 150, 30)
         self.button.clicked.connect(self.move_piece)
-        # self.button1 = QPushButton("Return")
-        # self.button1.setGeometry(750, 300, 150, 30)
-        # self.button1.clicked.connect(self.return_piece)
         self.line_edit.returnPressed.connect(self.button.click)
         self.line_edit.returnPressed.connect(self.line_edit.clear)
-        # Create a QGraphicsProxyWidget and set its widget to the QLineEdit
-        lineEdit_proxy = QGraphicsProxyWidget()
-        lineEdit_proxy.setWidget(self.line_edit)
-        self.addItem(lineEdit_proxy)
+
+        line_edit_proxy = QGraphicsProxyWidget()
+        line_edit_proxy.setWidget(self.line_edit)
+        self.addItem(line_edit_proxy)
         button_proxy = QGraphicsProxyWidget()
         button_proxy.setWidget(self.button)
         self.addItem(button_proxy)
-        # button1_proxy = QGraphicsProxyWidget()
-        # button1_proxy.setWidget(self.button1)
-        # self.addItem(button1_proxy)
-        self.addLabels()  # dodajemy etykiety do planszy
-        self.label = QLabel("Chess notation in format")
+        self.add_labels()
 
         self.white_move = True
         self.black_move = False
@@ -133,16 +125,7 @@ class ChessBoard(QGraphicsScene):
             self.clock2 = self.clock2.addMSecs(1)
             self.analog_clock2.update_time(self.clock2)
 
-    # def return_piece(self):
-    #     for item in self.items():
-    #         if isinstance(item, ChessPiece):
-    #             if item.old_xy !=(item.x, item.y):
-    #                 xy = tuple(val  + 10 for val in item.old_xy)
-    #                 square1 = self.items(QPointF(*xy), Qt.IntersectsItemShape)
-    #                 item.apllication_movement(QPointF(*item.old_xy), square1[0])
-    #                 self.move_happened = False
-
-    def changeBoardColor(self, color1, color2):
+    def change_board_color(self, color1, color2):
         for item in self.items():
             if isinstance(item, ChessSquare):
                 if item.color == "white":
@@ -158,8 +141,7 @@ class ChessBoard(QGraphicsScene):
                     item.color = "grey"
                     item.setBrush(QBrush(QColor(item.color)))
 
-    def addLabels(self):
-        # Dodajemy etykiety z literami od A do H
+    def add_labels(self):
         letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         for i, letter in enumerate(letters):
             text = QGraphicsTextItem(letter)
@@ -171,11 +153,10 @@ class ChessBoard(QGraphicsScene):
             text1.setPos(i * 80 + 30, 640)
             self.addItem(text1)
 
-        # Dodajemy etykiety z numerami od 1 do 8
         for i in range(8):
             text = QGraphicsTextItem(str(i + 1))
             text.setFont(QFont("Arial", 16))
-            text.setPos(-30, - i * 80 + 585 )
+            text.setPos(-30, (- i * 80 + 585) )
             self.addItem(text)
             text1 = QGraphicsTextItem(str(i + 1))
             text1.setFont(QFont("Arial", 16))
@@ -198,7 +179,7 @@ class ChessBoard(QGraphicsScene):
             if piece.color == self.current_player:
                 piece.possible_moves = piece.moves_continue()
                 if new_tuple_dst in piece.possible_moves:
-                    piece.apllication_movement(QPointF(*new_tuple_dst), dst_square[0])
+                    piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
         self.line_edit.clear()
 
 
@@ -207,15 +188,12 @@ class ChessBoard(QGraphicsScene):
         file_map = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
         rank_map = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
 
-        # Ensure that the notation is in the correct format
         if len(notation) != 2:
             raise ValueError("Invalid notation: {}".format(notation))
 
-        # Extract the file and rank from the notation
         file = notation[0]
         rank = notation[1]
 
-        # Convert the file and rank to indices
         if file not in file_map or rank not in rank_map:
             raise ValueError("Invalid notation: {}".format(notation))
         x = file_map[file]
