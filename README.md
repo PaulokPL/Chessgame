@@ -1,7 +1,6 @@
 # Chess Game
 
-Bierkę w szachach można przeciągać w dowolne podświetlone miejsce, są to wszystkie dozwolone ruchy
-Przeciągnięcie poza dozwolone, albo poza scenę resetuje pozycję do pozycji startowej.
+Bierkę w szachach można przeciągać w dowolne podświetlone miejsce, są to wszystkie dozwolone ruchy, przeciągnięcie poza dozwolone resetuje pozycję do pozycji startowej.
 
 W zamieszczonym polu do wpisywania należy wpisać notację szachową w postaci długiej notacji szachowej, która jest uznawana przez organizacje międzynarodowe
 ![336918380_9933133706727653_3503322931619839233_n](https://user-images.githubusercontent.com/84084302/229420080-90031cad-38a8-4b80-82d0-b7a1a363cde4.png)
@@ -13,7 +12,7 @@ Wszystkie reguły gry zostały zaimplementowane do gry:
 - bicie w przelocie
 - roszada, włączając w to sprawdzanie, czy król nie jest aktualnie szachowany
 - promocja piona — na ostatnim polu pojawi się okno dla piona, możemy wtedy wybrać jedną z czterech dostępnych figur
-- sprawdzanie szacha i mata — nie pojawia się wprawdzie żaden komunikat o szachu, jednak nie będzie możliwe wykonanie ruchu prowadzącego do szacha, czy w przypadku mata nie będzie możliwe wykonanie żadnego ruchu
+- sprawdzanie szacha i mata — w przypadku tylko szacha, kwadrat pod królem podświetla się na czerwono, w przypadku mata, prócz koloru, pojawia się komunikat o macie w labelu pomiędzy zegarami
 
 Po prawej stronie znajdują się dwa klikalne zegary ze wskazówkami — minutowa, sekundowa i milisekundowa.
 

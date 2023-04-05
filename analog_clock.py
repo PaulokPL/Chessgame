@@ -69,14 +69,44 @@ class AnalogClock(QGraphicsWidget):
         if self.is_running:
             if event.button() == Qt.LeftButton:
                 if self.scene().white_clock and self.scene().analog_clock.is_running:
-                    self.is_running = False
-                    self.scene().current_player = "black"
-                    self.scene().black_move = True
-                    self.scene().white_clock = False
-                    self.scene().analog_clock2.is_running = True
+                    if self.check_mate():
+                        self.scene().label.setText("Black mate")
+                    else:
+                        self.is_running = False
+                        self.scene().current_player = "black"
+                        self.scene().black_move = True
+                        self.scene().white_clock = False
+                        self.scene().analog_clock2.is_running = True
+                        self.scene().label.setText("Black move")
+                        square = self.scene().items(QPointF(self.scene().white_king.x + 10, self.scene().white_king.y + 10),Qt.IntersectsItemShape)[0]
+                        square.setBrush(QBrush(QColor(square.color)))
+                    black_king = self.scene().black_king
+                    if black_king.is_in_check(black_king.x, black_king.y):
+                        square = self.scene().items(QPointF(black_king.x + 10, black_king.y + 10), Qt.IntersectsItemShape)[0]
+                        square.setBrush(QBrush(QColor("red")))
+
                 elif self.scene().black_clock and self.scene().current_player == "black":
-                    self.is_running = False
-                    self.scene().current_player = "white"
-                    self.scene().white_move = True
-                    self.scene().black_clock = False
-                    self.scene().analog_clock.is_running = True
+                    if self.check_mate():
+                        self.scene().label.setText("White mate")
+                        self.is_running = False
+                    else:
+                        square = self.scene().items(QPointF(self.scene().black_king.x + 10, self.scene().black_king.y + 10), Qt.IntersectsItemShape)[0]
+                        square.setBrush(QBrush(QColor(square.color)))
+                        self.is_running = False
+                        self.scene().current_player = "white"
+                        self.scene().white_move = True
+                        self.scene().black_clock = False
+                        self.scene().analog_clock.is_running = True
+                        self.scene().label.setText("White move")
+                    white_king = self.scene().white_king
+                    if white_king.is_in_check(white_king.x, white_king.y):
+                        square = self.scene().items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[0]
+                        square.setBrush(QBrush(QColor("red")))
+
+
+    def check_mate(self):
+        for pieces in self.scene().white_pieces:
+            if pieces.color != self.scene().current_player:
+                if len(pieces.moves_continue()) > 0:
+                    return False
+        return True

@@ -23,6 +23,14 @@ class ChessBoard(QGraphicsScene):
         self.button.clicked.connect(self.move_piece)
         self.line_edit.returnPressed.connect(self.button.click)
         self.line_edit.returnPressed.connect(self.line_edit.clear)
+        self.label = QLabel("White move")
+        self.label.setGeometry(800, 300, 150, 30)
+        self.label.setStyleSheet("background-color: #a2a4a8;")
+        self.label.setFont(QFont("Arial", 15))
+        label_proxy = QGraphicsProxyWidget()
+        label_proxy.setWidget(self.label)
+        self.addItem(label_proxy)
+
 
         line_edit_proxy = QGraphicsProxyWidget()
         line_edit_proxy.setWidget(self.line_edit)
@@ -207,3 +215,4 @@ class ChessBoard(QGraphicsScene):
         y = rank_map[rank]
 
         return x, y
+
