@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
+from PySide2.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
 from PySide2 import QtCore
 
 class PromotionDialog(QDialog):

@@ -3,7 +3,6 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from chess_square import ChessSquare
 from promotiondialog import PromotionDialog
-import numpy as np
 
 class ChessPiece(QGraphicsPixmapItem):
     def __init__(self, x, y, size, color, player, piece_type, filename):
@@ -27,80 +26,69 @@ class ChessPiece(QGraphicsPixmapItem):
         self.my_king_check = False
 
     def mousePressEvent(self, event):
-        # Sprawdza, czy pionek został kliknięty przez gracza
-        # if not self.scene().move_happened:
+        if self.scene().white_move or self.scene().black_move:
             if self.scene().current_player == self.color:
                 if event.button() == Qt.LeftButton:
-                # Jeśli tak, to ustawia jego stan jako "wybrany"
                     self.selected = True
                     self.setOpacity(0.5)
-                    # Oblicza różnicę między pozycją myszy a pozycją pionka
                     self.offset = event.pos()
                     self.setZValue(1)
                     self.possible_moves = self.moves_continue()
                     self.highlight_moves()
-
-
     def mouseMoveEvent(self, event):
-        # Sprawdza, czy pionek jest wybrany i przesuwa go na nową pozycję
         if self.selected:
             new_pos = event.scenePos() - self.offset
             self.setPos(new_pos)
 
     def mouseReleaseEvent(self, event):
-        # if not self.scene().move_happened:
             if self.scene().current_player == self.color:
                 if event.button() == Qt.LeftButton:
-                    # Sprawdza, czy pionek został przeciągnięty poza planszę
                     if self.sceneBoundingRect().intersects(self.scene().sceneRect()) == False:
                         self.selected = False
                         self.setOpacity(1.0)
                         self.setPos(self.x, self.y)
                         return
-                    # Znajduje pole na planszy, w którym pionek powinien zostać umieszczony
-                    for item in self.collidingItems():
-                        if isinstance(item, ChessSquare):
-                            square = item
-                            break
+
+                    # colliding_items = self.collidingItems()
+                    squares = [item for item in self.collidingItems() if isinstance(item, ChessSquare)]
+                    if squares:
+                        square = squares[0]
+                    # for item in self.collidingItems():
+                    #     if isinstance(item, ChessSquare):
+                    #         square = item
+                    #         break
                     else:
-                        # Pionek nie został przeciągnięty na żadne pole-resetuje stan
+
                         self.selected = False
                         self.setOpacity(1.0)
                         self.setPos(self.x, self.y)
                         return
-                    # Ustawia pozycję pionka na środek znalezionego pola
+
                     new_pos = square.mapToScene(square.rect().center()) + QPointF(-40, -40)
                     if (new_pos.x(), new_pos.y()) in self.possible_moves:
-                        self.apllication_movement(new_pos, square)
-                        # self.scene().move_happened = True
+                        self.application_movement(new_pos, square)
                     else:
                         self.setPos(self.x, self.y)
-                    # Compute new moves
+
                     possible_moves = self.possible_moves
-                    # Add (10, 10) to each move
                     new_moves = [(move[0] + 10, move[1] + 10) for move in possible_moves]
-                    # Get all ChessSquares that intersect with each new move
                     squares = [square for move in new_moves for square in
                                self.scene().items(QPointF(*move), Qt.IntersectsItemShape) if
                                isinstance(square, ChessSquare)]
 
-                    # Set colors for each ChessSquare
                     colors = self.old_colors[:len(squares)]
                     self.old_colors = self.old_colors[len(squares):]
                     # for square, color in zip(squares, colors):
                     #     square.color = color
                     #     square.setBrush(QBrush(QColor(color)))
                     list(map(lambda square, color: (
-                    setattr(square, 'color', color), square.setBrush(QBrush(QColor(color)))), squares, colors))                    # Resetuje stan
+                    setattr(square, 'color', color), square.setBrush(QBrush(QColor(color)))), squares, colors))
 
-                    # for items1 in self.scene().white_pieces:
-                    #     print(items1.piece_type, " x:", items1.x, " y:", items1.y, "xsq: ", items1.current_square.x, " ysq: ", items1.current_square.y)
                     self.selected = False
                     self.setOpacity(1.0)
 
 
-    def apllication_movement(self, new_pos, square):
-            # Ustawia pozycję pionka na środek znalezionego pola
+    def application_movement(self, new_pos, square):
             self.current_square.piece = None
             self.current_square = square
             self.setPos(new_pos)
@@ -151,7 +139,6 @@ class ChessPiece(QGraphicsPixmapItem):
 
             self.x = new_pos.x()
             self.y = new_pos.y()
-            # Zapisuje referencję do pola, na którym się znajduje
             if square.piece is not None:
                 self.scene().white_pieces.remove(square.piece)
                 self.scene().removeItem(square.piece)
@@ -174,40 +161,38 @@ class ChessPiece(QGraphicsPixmapItem):
         dialog = PromotionDialog()
         if dialog.exec_():
             selected_piece = dialog.get_selected_piece()
-        if self.color == "white":
-            if selected_piece == "queen":
-                self.piece_type = selected_piece
-                self.setPixmap(QPixmap(":/chess_pieces/icons/white_queen.png").scaled(self.square_size, self.square_size))
-            elif selected_piece == "bishop":
-                self.piece_type = selected_piece
-                self.setPixmap(QPixmap(":/chess_pieces/icons/white_bishop.png").scaled(self.square_size, self.square_size))
-            elif selected_piece == "rook":
-                self.piece_type = selected_piece
-                self.setPixmap(
-                    QPixmap(":/chess_pieces/icons/white_rook.png").scaled(self.square_size, self.square_size))
+            if self.color == "white":
+                if selected_piece == "queen":
+                    self.piece_type = selected_piece
+                    self.setPixmap(QPixmap(":/chess_pieces/icons/white_queen.png").scaled(self.square_size, self.square_size))
+                elif selected_piece == "bishop":
+                    self.piece_type = selected_piece
+                    self.setPixmap(QPixmap(":/chess_pieces/icons/white_bishop.png").scaled(self.square_size, self.square_size))
+                elif selected_piece == "rook":
+                    self.piece_type = selected_piece
+                    self.setPixmap(QPixmap(":/chess_pieces/icons/white_rook.png").scaled(self.square_size, self.square_size))
+                else:
+                    self.piece_type = selected_piece
+                    self.setPixmap(QPixmap(":/chess_pieces/icons/white_knight.png").scaled(self.square_size, self.square_size))
             else:
-                self.piece_type = selected_piece
-                self.setPixmap(QPixmap(":/chess_pieces/icons/white_knight.png").scaled(self.square_size, self.square_size))
-        else:
-            if selected_piece == "queen":
-                self.piece_type = selected_piece
-                self.setPixmap(QPixmap(":/chess_pieces/icons/black_queen.png").scaled(self.square_size, self.square_size))
-            elif selected_piece == "bishop":
-                self.piece_type = selected_piece
-                self.setPixmap(QPixmap(":/chess_pieces/icons/black_bishop.png").scaled(self.square_size, self.square_size))
-            elif selected_piece == "rook":
-                self.piece_type = selected_piece
-                self.setPixmap(QPixmap(":/chess_pieces/icons/black_rook.png").scaled(self.square_size, self.square_size))
-            else:
-                self.piece_type = selected_piece
-                self.setPixmap(QPixmap(":/chess_pieces/icons/black_knight.png").scaled(self.square_size, self.square_size))
+                if selected_piece == "queen":
+                    self.piece_type = selected_piece
+                    self.setPixmap(QPixmap(":/chess_pieces/icons/black_queen.png").scaled(self.square_size, self.square_size))
+                elif selected_piece == "bishop":
+                    self.piece_type = selected_piece
+                    self.setPixmap(QPixmap(":/chess_pieces/icons/black_bishop.png").scaled(self.square_size, self.square_size))
+                elif selected_piece == "rook":
+                    self.piece_type = selected_piece
+                    self.setPixmap(QPixmap(":/chess_pieces/icons/black_rook.png").scaled(self.square_size, self.square_size))
+                else:
+                    self.piece_type = selected_piece
+                    self.setPixmap(QPixmap(":/chess_pieces/icons/black_knight.png").scaled(self.square_size, self.square_size))
 
     def get_possible_moves(self, x, y):
-
         moves = []
+
         if self.piece_type == "pawn":
             if self.color == "white":
-                # pionek biały może przesunąć się o jedno pole do przodu
                 square2 = self.scene().items(QPointF(x + 10, y + 10))[0]
                 row = square2.row
                 if row == 6:
@@ -215,7 +200,6 @@ class ChessPiece(QGraphicsPixmapItem):
                     if not self.is_square_occupied_TF(*two_squares_forward):
                         if not self.is_square_occupied_TF(x, y - self.square_size):
                             moves.append(two_squares_forward)
-                    # to pierwszy ruch pionka może przesunąć się o dwa pola do przodu
                 one_square_forward = (x, y - self.square_size)
                 if not self.is_square_occupied_TF(*one_square_forward):
                     moves.append(one_square_forward)
@@ -243,22 +227,18 @@ class ChessPiece(QGraphicsPixmapItem):
                         if self.is_square_occupied_C(*right_diagonal_square) is not square2.piece.color:
                             moves.append(right_diagonal_square)
 
-
             else:
                 square2 = self.scene().items(QPointF(x + 10, y + 10))[0]
                 row = square2.row
-
                 if row == 1:
                     two_squares_forward = (x, y + 2 * self.square_size)
                     if not self.is_square_occupied_TF(*two_squares_forward):
                         if not self.is_square_occupied_C(x, y + self.square_size):
                             moves.append(two_squares_forward)
-                    # to pierwszy ruch pionka może przesunąć się o dwa pola do przodu
                 one_square_forward = (x, y + self.square_size)
                 if not self.is_square_occupied_TF(*one_square_forward):
                     moves.append(one_square_forward)
                 if square2.col != 0:
-
                     if self.is_square_occupied_TF(x - 80, y):
                         if self.is_square_occupied_C(x - 80, y) is not square2.piece.color:
                             square1 = self.scene().items(QPointF(x - 80, y), Qt.IntersectsItemShape)
@@ -280,41 +260,38 @@ class ChessPiece(QGraphicsPixmapItem):
                     if self.is_square_occupied_C(*right_diagonal_square) is not None:
                         if self.is_square_occupied_C(*right_diagonal_square) is not square2.piece.color:
                             moves.append(right_diagonal_square)
+
         if self.piece_type == "rook" or self.piece_type == "queen":
             col = self.current_square.col
             row = self.current_square.row
-            # ruchy do przodu
             for i in range(row - 1, -1, -1):
                 if self.is_square_occupied_TF(x, i * 80):
                     if self.is_square_occupied_C(x, i * 80) is not self.color:
                         moves.append((x, i * self.square_size))
                     break
                 moves.append((x, i * self.square_size))
-            # ruchy do tyłu
             for i in range(row + 1, 8):
                 if self.is_square_occupied_TF(x, i * 80):
                     if self.is_square_occupied_C(x, i * 80) is not self.color:
                         moves.append((x, i * self.square_size))
                     break
                 moves.append((x, i * self.square_size))
-            # ruchy w prawo
             for i in range(col + 1, 8):
                 if self.is_square_occupied_TF(i * 80, y):
                     if self.is_square_occupied_C(i * 80, y) is not self.color:
                         moves.append((i * self.square_size, y))
                     break
                 moves.append((i * self.square_size, y))
-            # ruchy w lewo
             for i in range(col - 1, -1, -1):
                 if self.is_square_occupied_TF(i * 80, y):
                     if self.is_square_occupied_C(i * 80, y) is not self.color:
                         moves.append((i * self.square_size, y))
                     break
                 moves.append((i * self.square_size, y))
+
         if self.piece_type == "bishop" or self.piece_type == "queen":
             col = self.current_square.col
             row = self.current_square.row
-            # ruchy w prawo i do góry
             i = 1
             while col + i < 8 and row - i >= 0:
                 if self.is_square_occupied_TF((col + i) * self.square_size, (row - i) * self.square_size):
@@ -324,7 +301,6 @@ class ChessPiece(QGraphicsPixmapItem):
                     break
                 moves.append(((col + i) * self.square_size, (row - i) * self.square_size))
                 i += 1
-            ## ruchy w lewo i do góry
             i = 1
             while col - i >= 0 and row - i >= 0:
                 if self.is_square_occupied_TF((col - i) * self.square_size, (row - i) * self.square_size):
@@ -333,8 +309,6 @@ class ChessPiece(QGraphicsPixmapItem):
                     break
                 moves.append(((col - i) * self.square_size, (row - i) * self.square_size))
                 i += 1
-
-            # ruchy w prawo i do dołu
             i = 1
             while col + i < 8 and row + i < 8:
                 if self.is_square_occupied_TF((col + i) * self.square_size, (row + i) * self.square_size):
@@ -343,8 +317,6 @@ class ChessPiece(QGraphicsPixmapItem):
                     break
                 moves.append(((col + i) * self.square_size, (row + i) * self.square_size))
                 i += 1
-
-            # ruchy w lewo i do dołu
             i = 1
             while col - i >= 0 and row + i < 8:
                 if self.is_square_occupied_TF((col - i) * self.square_size, (row + i) * self.square_size):
@@ -353,6 +325,7 @@ class ChessPiece(QGraphicsPixmapItem):
                     break
                 moves.append(((col - i) * self.square_size, (row + i) * self.square_size))
                 i += 1
+
         if self.piece_type == "knight":
             col = self.current_square.col
             row = self.current_square.row
@@ -365,15 +338,14 @@ class ChessPiece(QGraphicsPixmapItem):
                             moves.append((move[0] * self.square_size, move[1] * self.square_size))
                     else:
                         moves.append((move[0] * self.square_size, move[1] * self.square_size))
+
         if self.piece_type == "king":
             col = self.current_square.col
             row = self.current_square.row
-            # ruchy do przodu
             if row > 0:
                 if not self.is_square_occupied_C(col * self.square_size, (row - 1) * self.square_size) \
                         or self.is_square_occupied_C(col * self.square_size, (row - 1) * self.square_size) != self.color:
                     moves.append((col * self.square_size, (row - 1) * self.square_size))
-                # ruchy na ukos w górę
                 if col > 0:
                     if not self.is_square_occupied_C((col - 1) * self.square_size, (row - 1) * self.square_size) \
                             or self.is_square_occupied_C((col - 1) * self.square_size, (row - 1) * self.square_size) != self.color:
@@ -382,12 +354,10 @@ class ChessPiece(QGraphicsPixmapItem):
                     if not self.is_square_occupied_C((col + 1) * self.square_size, (row - 1) * self.square_size) \
                             or self.is_square_occupied_C((col + 1) * self.square_size, (row - 1) * self.square_size) != self.color:
                         moves.append(((col + 1) * self.square_size, (row - 1) * self.square_size))
-            # ruchy w dół
             if row < 7:
                 if not self.is_square_occupied_C(col * self.square_size, (row + 1) * self.square_size) \
                         or self.is_square_occupied_C(col * self.square_size, (row + 1) * self.square_size) != self.color:
                     moves.append((col * self.square_size, (row + 1) * self.square_size))
-                # ruchy na ukos w dół
                 if col > 0:
                     if not self.is_square_occupied_C((col - 1) * self.square_size, (row + 1) * self.square_size) \
                             or self.is_square_occupied_C((col - 1) * self.square_size, (row + 1) * self.square_size) != self.color:
@@ -396,7 +366,6 @@ class ChessPiece(QGraphicsPixmapItem):
                     if not self.is_square_occupied_C((col + 1) * self.square_size, (row + 1) * self.square_size) \
                             or self.is_square_occupied_C((col + 1) * self.square_size, (row + 1) * self.square_size) != self.color:
                         moves.append(((col + 1) * self.square_size, (row + 1) * self.square_size))
-                # ruchy na boki
             if col > 0:
                 if not self.is_square_occupied_C((col - 1) * self.square_size, row * self.square_size) \
                         or self.is_square_occupied_C((col - 1) * self.square_size, row * self.square_size) != self.color:
@@ -426,15 +395,11 @@ class ChessPiece(QGraphicsPixmapItem):
 
         return moves
 
-
     def moves_continue(self):
         x = self.scenePos().x()
         y = self.scenePos().y()
         possible_moves = self.get_possible_moves(x, y)
         possible_moves = [mov for mov in possible_moves if self.is_square_occupied_PT(*mov) != "king"]
-        # for mov in possible_moves:
-        #     if self.is_square_occupiedv3(*mov) == "king":
-        #         possible_moves.remove(mov)
         for pieces in self.scene().white_pieces:
             if pieces.piece_type== "king" and pieces.color == self.color:
                 if not self.is_in_check(pieces.x, pieces.y):
@@ -547,8 +512,6 @@ class ChessPiece(QGraphicsPixmapItem):
                                 self.current_square = old_square
                                 self.current_square.piece = self
                         else:
-
-                            something = False
                             old_square = self.current_square
                             self.current_square.piece = None
                             new_move = (move[0] + 10, move[1] + 10)
@@ -556,7 +519,6 @@ class ChessPiece(QGraphicsPixmapItem):
                             remember_new_square = squares[0].piece
                             self.current_square = squares[0]
                             if squares[0].piece is not None:
-                                something = True
                                 self.scene().white_pieces.remove(squares[0].piece)
                             squares[0].piece = self
 
@@ -570,7 +532,7 @@ class ChessPiece(QGraphicsPixmapItem):
                             self.current_square = old_square
                             self.current_square.piece = self
                             squares[0].piece = remember_new_square
-                            if something == True:
+                            if squares[0].piece is not None:
                                 self.scene().white_pieces.append(squares[0].piece)
                     possible_moves = new_possible_moves
         return possible_moves
@@ -581,21 +543,22 @@ class ChessPiece(QGraphicsPixmapItem):
                 if (x, y) in pieces.get_possible_moves(pieces.x, pieces.y):
                     return True
         return False
+
     def is_castling_allowed(self, rook):
         if self.has_moved or rook.has_moved:
             return False
         x1, y1 = self.x,  self.y
         x2, y2 = rook.x, rook.y
-        if x1 < x2:  # king side castling
+        if x1 < x2:
             if any(self.is_square_occupied_TF(x, y) for x, y in [(x1 + 80, y1), (x1 + 160, y1)]):
                 return False
-        else:  # queen side castling
+        else:
             if any(self.is_square_occupied_TF(x, y) for x, y in [(x1 - 80, y1), (x1 - 160, y1), (x1 - 240, y1)]):
                 return False
-        # # Check if the king is not in check and won't be in check after the move
         if self.my_king_check:
             return False
         return True
+
     def highlight_moves(self):
         self.old_colors = []
         for move in self.possible_moves:
@@ -605,6 +568,7 @@ class ChessPiece(QGraphicsPixmapItem):
             self.old_colors.append(square.color)
             square.color = "light green"
             square.setBrush(QBrush(QColor(square.color)))
+
     def is_square_occupied_C(self, x, y):
         items = self.scene().items(QPointF(x+10, y+10))
         square = items[0]
@@ -623,5 +587,3 @@ class ChessPiece(QGraphicsPixmapItem):
         if square.piece is not None:
             return square.piece.piece_type
         return None
-
-
