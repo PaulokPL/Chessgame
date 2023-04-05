@@ -10,13 +10,11 @@ class AnalogClock(QGraphicsWidget):
         self.is_running = False
 
     def paint(self, painter, option, widget):
-
         painter.setRenderHint(QPainter.Antialiasing)
 
         side = 200
         center = QPoint(100, 100)
 
-        # draw the clock face
         outer_radius = side / 2
         inner_radius = outer_radius * 0.9
         clock_face = QBrush(QColor(255, 255, 255))
@@ -25,21 +23,18 @@ class AnalogClock(QGraphicsWidget):
         painter.setBrush(Qt.black)
         painter.drawEllipse(center, 2, 2)
 
-
-        # draw the minute marks
         minute_pen = QPen(QColor(0, 0, 0))
         minute_pen.setWidth(2)
+        painter.setPen(minute_pen)
+        minute_length = inner_radius
         for i in range(60):
             angle = i * 6
-            minute_length = inner_radius * 1
             x1 = center.x() + minute_length * sin(angle * pi / 180)
             y1 = center.y() + minute_length * cos(angle * pi / 180)
             x2 = center.x() + inner_radius * 0.9 * sin(angle * pi / 180)
             y2 = center.y() + inner_radius * 0.9 * cos(angle * pi / 180)
-            painter.setPen(minute_pen)
             painter.drawLine(QPointF(x2, y2), QPointF(x1, y1))
 
-        # draw the minute hand
         minute_pen.setWidth(4)
         minute_pen.setColor(QColor(0, 0, 0))
         painter.setPen(minute_pen)
@@ -49,7 +44,6 @@ class AnalogClock(QGraphicsWidget):
         y = center.y() - minute_length * cos(minute_angle * pi / 180)
         painter.drawLine(center, QPointF(x, y))
 
-        # draw the second hand
         second_pen = QPen(QColor(0, 0, 255))
         painter.setPen(second_pen)
         second_length = inner_radius * 0.9
@@ -58,7 +52,6 @@ class AnalogClock(QGraphicsWidget):
         y = center.y() - second_length * cos(second_angle * pi / 180)
         painter.drawLine(center, QPointF(x, y))
 
-        # draw the millisecond hand
         millisecond_pen = QPen(QColor(0, 255, 0))
         painter.setPen(millisecond_pen)
         millisecond_length = inner_radius * 0.8
