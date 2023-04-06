@@ -31,6 +31,12 @@ class ChessBoard(QGraphicsScene):
         label_proxy.setWidget(self.label)
         self.addItem(label_proxy)
 
+        # self.gambit = QPushButton("Gambit sandomierski")
+        # self.gambit.setGeometry(600, 721, 150, 30)
+        # self.gambit.clicked.connect(self.gambit_sandomierski)
+        # gambit_proxy = QGraphicsProxyWidget()
+        # gambit_proxy.setWidget(self.gambit)
+        # self.addItem(gambit_proxy)
 
         line_edit_proxy = QGraphicsProxyWidget()
         line_edit_proxy.setWidget(self.line_edit)
@@ -215,4 +221,18 @@ class ChessBoard(QGraphicsScene):
         y = rank_map[rank]
 
         return x, y
+
+    # def gambit_sandomierski(self):
+    #     if self.white_move:
+    #         square = self.items(QPointF(410, 570), Qt.IntersectsItemShape)[0]
+    #         self.white_pieces.remove(square.piece)
+    #         self.removeItem(square.piece)
+    #         square = self.items(QPointF(490, 570), Qt.IntersectsItemShape)[0]
+    #         self.white_pieces.remove(square.piece)
+    #         self.removeItem(square.piece)
+    #         square = self.items(QPointF(570, 570), Qt.IntersectsItemShape)[0]
+    #         self.white_pieces.remove(square.piece)
+    #         self.removeItem(square.piece)
+    #         self.gambit.setEnabled(False)
+
 

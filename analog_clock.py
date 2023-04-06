@@ -70,7 +70,7 @@ class AnalogClock(QGraphicsWidget):
             if event.button() == Qt.LeftButton:
                 if self.scene().white_clock and self.scene().analog_clock.is_running:
                     if self.check_mate():
-                        self.scene().label.setText("Black mate")
+                        self.scene().label.setText("White wins")
                     else:
                         self.is_running = False
                         self.scene().current_player = "black"
@@ -87,7 +87,7 @@ class AnalogClock(QGraphicsWidget):
 
                 elif self.scene().black_clock and self.scene().current_player == "black":
                     if self.check_mate():
-                        self.scene().label.setText("White mate")
+                        self.scene().label.setText("Black wins")
                         self.is_running = False
                     else:
                         square = self.scene().items(QPointF(self.scene().black_king.x + 10, self.scene().black_king.y + 10), Qt.IntersectsItemShape)[0]
