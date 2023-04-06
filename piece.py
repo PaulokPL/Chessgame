@@ -86,9 +86,9 @@ class ChessPiece(QGraphicsPixmapItem):
             self.setZValue(1)
             if self.piece_type == "king":
                 if self.color == "white":
-                    self.scene().white_king = (new_pos.x(), new_pos.y())
+                    self.scene().white_king = self
                 else:
-                    self.scene().black_king = (new_pos.x(), new_pos.y())
+                    self.scene().black_king = self
                 if abs(self.x - new_pos.x()) > 90:
                     if new_pos.x() == 480:
                         square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
@@ -141,6 +141,7 @@ class ChessPiece(QGraphicsPixmapItem):
             square.piece = self
             self.has_moved = True
             if self.scene().white_move:
+                # self.scene().gambit.setEnabled(False)
                 self.scene().white_move = False
                 self.scene().white_clock = True
             else:
