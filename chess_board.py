@@ -6,6 +6,8 @@ from piece import ChessPiece
 from chess_square import ChessSquare
 from PySide2.QtWidgets import QGraphicsProxyWidget, QPushButton
 from analog_clock import  AnalogClock
+from config import ConfigDialog
+
 class ChessBoard(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -14,7 +16,7 @@ class ChessBoard(QGraphicsScene):
         self.addRect(-80, -80, 800, 800, QPen(), QBrush(QColor("#c9b18b")))
         self.setBackgroundBrush(QBrush(QColor(162, 164, 168, 255)))
         self.white_pieces = []
-        self.black_pieces = []
+        self.move_history = []
         self.current_player = "white"
         self.line_edit = QLineEdit()
         self.line_edit.setGeometry(100, 721, 300, 30)
@@ -31,12 +33,12 @@ class ChessBoard(QGraphicsScene):
         label_proxy.setWidget(self.label)
         self.addItem(label_proxy)
 
-        self.gambit = QPushButton("Gambit sandomierski")
-        self.gambit.setGeometry(600, 721, 150, 30)
-        self.gambit.clicked.connect(self.gambit_sandomierski)
-        gambit_proxy = QGraphicsProxyWidget()
-        gambit_proxy.setWidget(self.gambit)
-        self.addItem(gambit_proxy)
+        self.config = QPushButton("Config")
+        self.config.setGeometry(725, -50, 200, 50)
+        self.config.clicked.connect(self.config_show)
+        config_proxy = QGraphicsProxyWidget()
+        config_proxy.setWidget(self.config)
+        self.addItem(config_proxy)
 
         line_edit_proxy = QGraphicsProxyWidget()
         line_edit_proxy.setWidget(self.line_edit)
@@ -67,76 +69,77 @@ class ChessBoard(QGraphicsScene):
         self.analog_clock2.setGeometry(750, 50, 200, 200)
         self.timer.start()
 
+        self.set_scene()
         QResource.registerResource("chess_pieces.qrc")
 
-        for row in range(8):
-            for col in range(8):
-                x = col * self.square_size
-                y = row * self.square_size
-
-                if (row + col) % 2 == 0:
-                    color = "white"
-                else:
-                    color = "grey"
-
-                square = ChessSquare(x, y, self.square_size, color)
-                self.addItem(square)
-
-                if row in [0, 1, 6, 7]:
-                    if row in [6, 7]:
-                        player = "white"
-                        color_piece = "white"
-                        if row in [0, 7]:
-                            if col == 0 or col == 7:
-                                piece_type = "rook"
-                                filename = ":/chess_pieces/icons/white_rook.png"
-                            elif col == 1 or col == 6:
-                                piece_type = "knight"
-                                filename = ":/chess_pieces/icons/white_knight.png"
-                            elif col == 2 or col == 5:
-                                piece_type = "bishop"
-                                filename = ":/chess_pieces/icons/white_bishop.png"
-                            elif col == 3:
-                                piece_type = "queen"
-                                filename = ":/chess_pieces/icons/white_queen.png"
-                            else:
-                                piece_type = "king"
-                                filename = ":/chess_pieces/icons/white_king.png"
-                        else:
-                            piece_type = "pawn"
-                            filename = ":/chess_pieces/icons/white_pawn.png"
-                    else:
-                        player = "black"
-                        color_piece = "black"
-                        if row in [0, 7]:
-                            if col == 0 or col == 7:
-                                piece_type = "rook"
-                                filename = ":/chess_pieces/icons/black_rook.png"
-                            elif col == 1 or col == 6:
-                                piece_type = "knight"
-                                filename = ":/chess_pieces/icons/black_knight.png"
-                            elif col == 2 or col == 5:
-                                piece_type = "bishop"
-                                filename = ":/chess_pieces/icons/black_bishop.png"
-                            elif col == 3:
-                                piece_type = "queen"
-                                filename = ":/chess_pieces/icons/black_queen.png"
-                            else:
-                                piece_type = "king"
-                                filename = ":/chess_pieces/icons/black_king.png"
-                        else:
-                            piece_type = "pawn"
-                            filename = ":/chess_pieces/icons/black_pawn.png"
-                    piece = ChessPiece(x, y, self.square_size, color_piece, player, piece_type, filename)
-                    if piece.piece_type == "king":
-                        if piece.color == "white":
-                            self.white_king = piece
-                        else:
-                            self.black_king = piece
-                    piece.current_square = square
-                    square.piece = piece
-                    self.addItem(piece)
-                    self.white_pieces.append(piece)
+        # for row in range(8):
+        #     for col in range(8):
+        #         x = col * self.square_size
+        #         y = row * self.square_size
+        #
+        #         if (row + col) % 2 == 0:
+        #             color = "white"
+        #         else:
+        #             color = "grey"
+        #
+        #         square = ChessSquare(x, y, self.square_size, color)
+        #         self.addItem(square)
+        #
+        #         if row in [0, 1, 6, 7]:
+        #             if row in [6, 7]:
+        #                 player = "white"
+        #                 color_piece = "white"
+        #                 if row in [0, 7]:
+        #                     if col == 0 or col == 7:
+        #                         piece_type = "rook"
+        #                         filename = ":/chess_pieces/icons/white_rook.png"
+        #                     elif col == 1 or col == 6:
+        #                         piece_type = "knight"
+        #                         filename = ":/chess_pieces/icons/white_knight.png"
+        #                     elif col == 2 or col == 5:
+        #                         piece_type = "bishop"
+        #                         filename = ":/chess_pieces/icons/white_bishop.png"
+        #                     elif col == 3:
+        #                         piece_type = "queen"
+        #                         filename = ":/chess_pieces/icons/white_queen.png"
+        #                     else:
+        #                         piece_type = "king"
+        #                         filename = ":/chess_pieces/icons/white_king.png"
+        #                 else:
+        #                     piece_type = "pawn"
+        #                     filename = ":/chess_pieces/icons/white_pawn.png"
+        #             else:
+        #                 player = "black"
+        #                 color_piece = "black"
+        #                 if row in [0, 7]:
+        #                     if col == 0 or col == 7:
+        #                         piece_type = "rook"
+        #                         filename = ":/chess_pieces/icons/black_rook.png"
+        #                     elif col == 1 or col == 6:
+        #                         piece_type = "knight"
+        #                         filename = ":/chess_pieces/icons/black_knight.png"
+        #                     elif col == 2 or col == 5:
+        #                         piece_type = "bishop"
+        #                         filename = ":/chess_pieces/icons/black_bishop.png"
+        #                     elif col == 3:
+        #                         piece_type = "queen"
+        #                         filename = ":/chess_pieces/icons/black_queen.png"
+        #                     else:
+        #                         piece_type = "king"
+        #                         filename = ":/chess_pieces/icons/black_king.png"
+        #                 else:
+        #                     piece_type = "pawn"
+        #                     filename = ":/chess_pieces/icons/black_pawn.png"
+        #             piece = ChessPiece(x, y, self.square_size, color_piece, player, piece_type, filename)
+        #             if piece.piece_type == "king":
+        #                 if piece.color == "white":
+        #                     self.white_king = piece
+        #                 else:
+        #                     self.black_king = piece
+        #             piece.current_square = square
+        #             square.piece = piece
+        #             self.addItem(piece)
+        #             self.white_pieces.append(piece)
 
     def update_clock(self):
         if self.analog_clock.is_running:
@@ -222,17 +225,102 @@ class ChessBoard(QGraphicsScene):
 
         return x, y
 
-    def gambit_sandomierski(self):
-        if self.white_move:
-            square = self.items(QPointF(410, 570), Qt.IntersectsItemShape)[0]
-            self.white_pieces.remove(square.piece)
-            self.removeItem(square.piece)
-            square = self.items(QPointF(490, 570), Qt.IntersectsItemShape)[0]
-            self.white_pieces.remove(square.piece)
-            self.removeItem(square.piece)
-            square = self.items(QPointF(570, 570), Qt.IntersectsItemShape)[0]
-            self.white_pieces.remove(square.piece)
-            self.removeItem(square.piece)
-            self.gambit.setEnabled(False)
+    def config_show(self):
+        app = QApplication.instance()
+        if not app:
+            app = QApplication([])
+        dialog = ConfigDialog(self.move_history, self)
+        dialog.show()
+        # if dialog.exec_():
+        #     option = dialog.game_mode
+        #     if option == "AI":
+        #         for item in self.items():
+        #             if isinstance(item, ChessPiece):
+        #                 self.white_pieces.remove(item)
+        #                 self.removeItem(item)
+        #         self.set_scene()
 
 
+    def set_scene(self):
+        self.white_pieces = []
+        for item in self.items():
+            if isinstance(item, ChessPiece) or isinstance(item, ChessSquare):
+                self.removeItem(item)
+        self.clock = QTime(0, 0, 0, 0)
+        self.clock2 = QTime(0, 0, 0, 0)
+        self.current_player = "white"
+        self.label = QLabel("White move")
+        self.white_move = True
+        self.black_move = False
+        self.white_clock = False
+        self.black_clock = False
+        self.white_king = None
+        self.black_king = None
+        for row in range(8):
+            for col in range(8):
+                x = col * self.square_size
+                y = row * self.square_size
+
+                if (row + col) % 2 == 0:
+                    color = "white"
+                else:
+                    color = "grey"
+
+                square = ChessSquare(x, y, self.square_size, color)
+                self.addItem(square)
+
+                if row in [0, 1, 6, 7]:
+                    if row in [6, 7]:
+                        player = "white"
+                        color_piece = "white"
+                        if row in [0, 7]:
+                            if col == 0 or col == 7:
+                                piece_type = "rook"
+                                filename = ":/chess_pieces/icons/white_rook.png"
+                            elif col == 1 or col == 6:
+                                piece_type = "knight"
+                                filename = ":/chess_pieces/icons/white_knight.png"
+                            elif col == 2 or col == 5:
+                                piece_type = "bishop"
+                                filename = ":/chess_pieces/icons/white_bishop.png"
+                            elif col == 3:
+                                piece_type = "queen"
+                                filename = ":/chess_pieces/icons/white_queen.png"
+                            else:
+                                piece_type = "king"
+                                filename = ":/chess_pieces/icons/white_king.png"
+                        else:
+                            piece_type = "pawn"
+                            filename = ":/chess_pieces/icons/white_pawn.png"
+                    else:
+                        player = "black"
+                        color_piece = "black"
+                        if row in [0, 7]:
+                            if col == 0 or col == 7:
+                                piece_type = "rook"
+                                filename = ":/chess_pieces/icons/black_rook.png"
+                            elif col == 1 or col == 6:
+                                piece_type = "knight"
+                                filename = ":/chess_pieces/icons/black_knight.png"
+                            elif col == 2 or col == 5:
+                                piece_type = "bishop"
+                                filename = ":/chess_pieces/icons/black_bishop.png"
+                            elif col == 3:
+                                piece_type = "queen"
+                                filename = ":/chess_pieces/icons/black_queen.png"
+                            else:
+                                piece_type = "king"
+                                filename = ":/chess_pieces/icons/black_king.png"
+                        else:
+                            piece_type = "pawn"
+                            filename = ":/chess_pieces/icons/black_pawn.png"
+                    piece = ChessPiece(x, y, self.square_size, color_piece, player, piece_type, filename)
+                    if piece.piece_type == "king":
+                        if piece.color == "white":
+                            self.white_king = piece
+                        else:
+                            self.black_king = piece
+                    piece.current_square = square
+                    square.piece = piece
+                    self.addItem(piece)
+                    self.white_pieces.append(piece)

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     view.setGeometry(100,100, 1200, 900)
 
     # utwórz dialog konfiguracyjny
-    config_dialog = ConfigDialog()
-    config_dialog.exec_()
+    # config_dialog = ConfigDialog()
+    # config_dialog.exec_()
 
     app.exec_()

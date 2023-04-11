@@ -81,6 +81,7 @@ class ChessPiece(QGraphicsPixmapItem):
 
     def application_movement(self, new_pos, square):
             self.current_square.piece = None
+            actual_xy = (self.current_square.col, self.current_square.row)
             self.current_square = square
             self.setPos(new_pos)
             self.setZValue(1)
@@ -138,10 +139,18 @@ class ChessPiece(QGraphicsPixmapItem):
                 self.scene().white_pieces.remove(square.piece)
                 self.scene().removeItem(square.piece)
 
+            file_map = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h'}
+            rank_map = {7: '1', 6: '2', 5: '3', 4: '4', 3: '5', 2: '6', 1: '7', 0: '8'}
+            x = file_map[actual_xy[0]]
+            y = rank_map[actual_xy[1]]
+            x2 = file_map[int(self.x/80)]
+            y2 = rank_map[int(self.y/80)]
+            string = "{}{}{}{}".format(x, y, x2, y2)
+            self.scene().move_history.append(string)
+
             square.piece = self
             self.has_moved = True
             if self.scene().white_move:
-                # self.scene().gambit.setEnabled(False)
                 self.scene().white_move = False
                 self.scene().white_clock = True
             else:
