@@ -1,13 +1,9 @@
-import sys
 import time
-
-from PySide2.QtCore import Qt, QSettings, QPointF
-from PySide2.QtWidgets import QApplication, QDialog, QFormLayout,QVBoxLayout, QListWidget, QInputDialog, QRadioButton, QLineEdit, QPushButton, QMessageBox
-from PySide2.QtGui import QIntValidator
+from PySide2.QtCore import QPointF, QCoreApplication
+from PySide2.QtWidgets import QDialog, QFormLayout, QInputDialog, QRadioButton, QLineEdit, QPushButton, QMessageBox
 import sqlite3
 import json
 import xml.etree.ElementTree as ET
-from PySide2.QtCore import QThread, QCoreApplication
 
 class ConfigDialog(QDialog):
     def __init__(self, move_history, chessboard, parent=None):
@@ -34,9 +30,8 @@ class ConfigDialog(QDialog):
         layout.addRow("", self.ai_radio)
 
         self.ip_input = QLineEdit()
-
         self.ip_input.setInputMask("000.000.000.000;_")
-        # self.ip_input.setValidator(QIntValidator(0, 255, self))
+        self.ip_input.textChanged.connect(self.check_ip)
         self.port_input = QLineEdit()
         self.port_input.setInputMask("00000")
         layout.addRow("IP address:", self.ip_input)
@@ -58,35 +53,25 @@ class ConfigDialog(QDialog):
         load_history_button.clicked.connect(self.load_history)
         layout.addRow(save_history_button, load_history_button)
 
-        save_history_buttonxml = QPushButton("Save Game History in XML")
-        save_history_buttonxml.clicked.connect(self.save_history_xml)
-        load_history_buttonxml = QPushButton("Load Game History")
-        # load_history_button.clicked.connect(self.load_history)
-        layout.addRow(save_history_buttonxml, load_history_buttonxml)
+        save_history_button_xml = QPushButton("Save Game History in XML")
+        save_history_button_xml.clicked.connect(self.save_history_xml)
+        load_history_button_xml = QPushButton("Load Game History in XML")
+        load_history_button_xml.clicked.connect(self.load_history_xml)
+        layout.addRow(save_history_button_xml, load_history_button_xml)
+
+    def check_ip(self, text):
+        parts = text.split('.')
+        for part in parts:
+            if part != '':
+                if int(part)>255:
+                    QMessageBox.warning(self, "Error", "Invalid IP address!")
+                    self.ip_input.clear()
+                    break
 
     def on_radio_button_toggle(self, button):
         if button.isChecked():
             self.game_mode = button.text()
 
-    # def save_config(self):
-    #     settings = QSettings("MyApp", "MyGame")
-    #     settings.setValue("game_mode", self.game_mode)
-    #     settings.setValue("ip_address", self.ip_input.text())
-    #     settings.setValue("port", self.port_input.text())
-    #     QMessageBox.information(self, "Saved", "Configuration saved successfully.")
-    #
-    # def load_config(self):
-    #     settings = QSettings("MyApp", "MyGame")
-    #     game_mode = settings.value("game_mode", "1 player")
-    #     if game_mode == "1 player":
-    #         self.player_radio.setChecked(True)
-    #     elif game_mode == "2 player":
-    #         self.two_player_radio.setChecked(True)
-    #     elif game_mode == "AI":
-    #         self.ai_radio.setChecked(True)
-    #     self.ip_input.setText(settings.value("ip_address", ""))
-    #     self.port_input.setText(settings.value("port", ""))
-    #     QMessageBox.information(self, "Loaded", "Configuration loaded successfully.")
 
     def save_history(self):
         conn = sqlite3.connect("game_history.db")
@@ -181,8 +166,6 @@ class ConfigDialog(QDialog):
         c.execute("SELECT move_data FROM moves WHERE game_id = ? ORDER BY move_number", (game_id,))
         moves = c.fetchall()
 
-
-        # moves_str = "".join(moves)
         conn.close()
 
         if not moves:
@@ -190,7 +173,7 @@ class ConfigDialog(QDialog):
             return
 
         self.chessboard.set_scene()
-        movement = []
+
         for move in moves:
             move_str = "".join(move)
             file_map = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
@@ -229,3 +212,36 @@ class ConfigDialog(QDialog):
         #     move_list.addItem(move[0])
         #
         # replay_dialog.exec_()
+
+    def load_history_xml(self):
+        tree = ET.parse('game_history.xml')
+        root = tree.getroot()
+
+        moves = root.find('moves').findall('move')
+        self.chessboard.set_scene()
+
+        for move in moves:
+            move_str = move.text
+            file_map = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+            rank_map = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+            x_s = file_map[move_str[0]] * self.chessboard.square_size
+            y_s = rank_map[move_str[1]] * self.chessboard.square_size
+            x_d = file_map[move_str[2]] * self.chessboard.square_size
+            y_d = rank_map[move_str[3]] * self.chessboard.square_size
+            new_tuple_src = tuple((x_s, y_s))
+            new_tuple_dst = tuple((x_d, y_d))
+            new_tuple_dst_10 = tuple((x_d + 10, y_d + 10))
+            src_square = self.chessboard.items(QPointF(*new_tuple_src))
+            dst_square = self.chessboard.items(QPointF(*new_tuple_dst_10))
+            piece = src_square[0].piece
+            if piece is not None:
+                if piece.color == self.chessboard.current_player:
+                    piece.possible_moves = piece.moves_continue()
+                    if new_tuple_dst in piece.possible_moves:
+                        piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
+                        if self.chessboard.current_player == "white":
+                            self.chessboard.current_player = "black"
+                        else:
+                            self.chessboard.current_player = "white"
+            time.sleep(0.5)
+            QCoreApplication.processEvents()

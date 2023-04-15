@@ -32,7 +32,7 @@ class ChessBoard(QGraphicsScene):
         label_proxy = QGraphicsProxyWidget()
         label_proxy.setWidget(self.label)
         self.addItem(label_proxy)
-
+        self.game_mode = "1 player"
         self.config = QPushButton("Config")
         self.config.setGeometry(725, -50, 200, 50)
         self.config.clicked.connect(self.config_show)
@@ -230,9 +230,9 @@ class ChessBoard(QGraphicsScene):
         if not app:
             app = QApplication([])
         dialog = ConfigDialog(self.move_history, self)
-        dialog.show()
-        # if dialog.exec_():
-        #     option = dialog.game_mode
+        # dialog.show()
+        if dialog.exec_():
+            self.game_mode = dialog.game_mode
         #     if option == "AI":
         #         for item in self.items():
         #             if isinstance(item, ChessPiece):
@@ -249,7 +249,9 @@ class ChessBoard(QGraphicsScene):
         self.clock = QTime(0, 0, 0, 0)
         self.clock2 = QTime(0, 0, 0, 0)
         self.current_player = "white"
-        self.label = QLabel("White move")
+        self.label.setText("White move")
+        self.analog_clock.is_running = True
+        self.analog_clock2.is_running = False
         self.white_move = True
         self.black_move = False
         self.white_clock = False
