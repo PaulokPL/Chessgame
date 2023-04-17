@@ -7,7 +7,9 @@ from chess_square import ChessSquare
 from PySide2.QtWidgets import QGraphicsProxyWidget, QPushButton
 from analog_clock import  AnalogClock
 from config import ConfigDialog
-
+import time
+import socket
+import threading
 class ChessBoard(QGraphicsScene):
     def __init__(self, mode, ip, port, parent=None):
         super().__init__(parent)
@@ -20,6 +22,12 @@ class ChessBoard(QGraphicsScene):
         self.game_mode = mode
         self.ip = ip
         self.port = port
+        # print(ip,":", port)
+        # if self.game_mode == "2 players":
+        # self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.client_socket.connect((ip, int(port)))
+        # receive_thread = threading.Thread(target=self.receive_messages)
+        # receive_thread.start()
         self.current_player = "white"
         self.line_edit = QLineEdit()
         self.line_edit.setGeometry(100, 721, 300, 30)
@@ -73,6 +81,7 @@ class ChessBoard(QGraphicsScene):
 
         self.set_scene()
         QResource.registerResource("chess_pieces.qrc")
+
 
         # for row in range(8):
         #     for col in range(8):
@@ -142,6 +151,48 @@ class ChessBoard(QGraphicsScene):
         #             square.piece = piece
         #             self.addItem(piece)
         #             self.white_pieces.append(piece)
+    def receive_messages(self):
+        while True:
+            message = self.client_socket.recv(4096).decode()
+            self.move_history.append(message)
+            file_map = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+            rank_map = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+            x_s = file_map[message[0]] * self.square_size
+            y_s = rank_map[message[1]] * self.square_size
+            x_d = file_map[message[2]] * self.square_size
+            y_d = rank_map[message[3]] * self.square_size
+            new_tuple_src = tuple((x_s, y_s))
+            new_tuple_dst = tuple((x_d, y_d))
+            new_tuple_dst_10 = tuple((x_d + 10, y_d + 10))
+            src_square = self.items(QPointF(*new_tuple_src))
+            dst_square = self.items(QPointF(*new_tuple_dst_10))
+            piece = src_square[0].piece
+            if piece is not None:
+                if piece.color == self.current_player:
+                    piece.possible_moves = piece.moves_continue()
+                    if new_tuple_dst in piece.possible_moves:
+                        piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
+                        if self.current_player == "white":
+                            self.current_player = "black"
+                            self.black_move = True
+                            self.white_clock = False
+                            self.analog_clock.is_running = False
+                            self.analog_clock2.is_running = True
+                            self.label.setText("Black move")
+                        else:
+                            self.current_player = "white"
+                            self.white_move = True
+                            self.black_clock = False
+                            self.analog_clock2.is_running = False
+                            self.analog_clock.is_running = True
+                            self.label.setText("White move")
+            time.sleep(0.5)
+            QCoreApplication.processEvents()
+
+    def send_message(self):
+        message = self.move_history[-1]
+        self.client_socket.send(message.encode())
+
 
     def update_clock(self):
         if self.analog_clock.is_running:

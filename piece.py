@@ -41,42 +41,42 @@ class ChessPiece(QGraphicsPixmapItem):
             self.setPos(new_pos)
 
     def mouseReleaseEvent(self, event):
-            if self.scene().current_player == self.color:
-                if event.button() == Qt.LeftButton:
-                    if not self.sceneBoundingRect().intersects(self.scene().sceneRect()):
-                        self.selected = False
-                        self.setOpacity(1.0)
-                        self.setPos(self.x, self.y)
-                        return
-
-                    squares = [item for item in self.collidingItems() if isinstance(item, ChessSquare)]
-                    if squares:
-                        square = squares[0]
-                    else:
-                        self.selected = False
-                        self.setOpacity(1.0)
-                        self.setPos(self.x, self.y)
-                        return
-
-                    new_pos = square.mapToScene(square.rect().center()) + QPointF(-40, -40)
-                    if (new_pos.x(), new_pos.y()) in self.possible_moves:
-                        self.application_movement(new_pos, square)
-                    else:
-                        self.setPos(self.x, self.y)
-
-                    possible_moves = self.possible_moves
-                    new_moves = [(move[0] + 10, move[1] + 10) for move in possible_moves]
-                    squares = [square for move in new_moves for square in
-                               self.scene().items(QPointF(*move), Qt.IntersectsItemShape) if
-                               isinstance(square, ChessSquare)]
-
-                    colors = self.old_colors[:len(squares)]
-                    self.old_colors = self.old_colors[len(squares):]
-                    list(map(lambda square, color: (
-                        setattr(square, 'color', color), square.setBrush(QBrush(QColor(color)))), squares, colors))
-
+        if self.scene().current_player == self.color:
+            if event.button() == Qt.LeftButton:
+                if not self.sceneBoundingRect().intersects(self.scene().sceneRect()):
                     self.selected = False
                     self.setOpacity(1.0)
+                    self.setPos(self.x, self.y)
+                    return
+
+                squares = [item for item in self.collidingItems() if isinstance(item, ChessSquare)]
+                if squares:
+                    square = squares[0]
+                else:
+                    self.selected = False
+                    self.setOpacity(1.0)
+                    self.setPos(self.x, self.y)
+                    return
+
+                new_pos = square.mapToScene(square.rect().center()) + QPointF(-40, -40)
+                if (new_pos.x(), new_pos.y()) in self.possible_moves:
+                    self.application_movement(new_pos, square)
+                else:
+                    self.setPos(self.x, self.y)
+
+                possible_moves = self.possible_moves
+                new_moves = [(move[0] + 10, move[1] + 10) for move in possible_moves]
+                squares = [square for move in new_moves for square in
+                           self.scene().items(QPointF(*move), Qt.IntersectsItemShape) if
+                           isinstance(square, ChessSquare)]
+
+                colors = self.old_colors[:len(squares)]
+                self.old_colors = self.old_colors[len(squares):]
+                list(map(lambda square, color: (
+                    setattr(square, 'color', color), square.setBrush(QBrush(QColor(color)))), squares, colors))
+
+                self.selected = False
+                self.setOpacity(1.0)
 
 
     def application_movement(self, new_pos, square):

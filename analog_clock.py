@@ -69,6 +69,7 @@ class AnalogClock(QGraphicsWidget):
         if self.is_running:
             if event.button() == Qt.LeftButton:
                 if self.scene().white_clock and self.scene().analog_clock.is_running:
+                    # self.scene().send_message()
                     if self.check_mate():
                         self.scene().label.setText("White wins")
                     else:
