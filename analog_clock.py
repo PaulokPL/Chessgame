@@ -84,6 +84,9 @@ class AnalogClock(QGraphicsWidget):
                     if black_king.is_in_check(black_king.x, black_king.y):
                         square = self.scene().items(QPointF(black_king.x + 10, black_king.y + 10), Qt.IntersectsItemShape)[0]
                         square.setBrush(QBrush(QColor("red")))
+                    else:
+                        square = self.scene().items(QPointF(black_king.x + 10, black_king.y + 10), Qt.IntersectsItemShape)[0]
+                        square.setBrush(QBrush(QColor(square.color)))
 
                 elif self.scene().black_clock and self.scene().current_player == "black":
                     if self.check_mate():
@@ -102,6 +105,9 @@ class AnalogClock(QGraphicsWidget):
                     if white_king.is_in_check(white_king.x, white_king.y):
                         square = self.scene().items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[0]
                         square.setBrush(QBrush(QColor("red")))
+                    else:
+                        square = self.scene().items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[0]
+                        square.setBrush(QBrush(QColor(square.color)))
 
 
     def check_mate(self):

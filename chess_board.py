@@ -9,7 +9,7 @@ from analog_clock import  AnalogClock
 from config import ConfigDialog
 
 class ChessBoard(QGraphicsScene):
-    def __init__(self, parent=None):
+    def __init__(self, mode, ip, port, parent=None):
         super().__init__(parent)
         self.setSceneRect(-50, -50, 900, 800)
         self.square_size = 80
@@ -17,6 +17,9 @@ class ChessBoard(QGraphicsScene):
         self.setBackgroundBrush(QBrush(QColor(162, 164, 168, 255)))
         self.white_pieces = []
         self.move_history = []
+        self.game_mode = mode
+        self.ip = ip
+        self.port = port
         self.current_player = "white"
         self.line_edit = QLineEdit()
         self.line_edit.setGeometry(100, 721, 300, 30)
@@ -32,8 +35,7 @@ class ChessBoard(QGraphicsScene):
         label_proxy = QGraphicsProxyWidget()
         label_proxy.setWidget(self.label)
         self.addItem(label_proxy)
-        self.game_mode = "1 player"
-        self.config = QPushButton("Config")
+        self.config = QPushButton("Save/Load history")
         self.config.setGeometry(725, -50, 200, 50)
         self.config.clicked.connect(self.config_show)
         config_proxy = QGraphicsProxyWidget()
@@ -229,7 +231,7 @@ class ChessBoard(QGraphicsScene):
         app = QApplication.instance()
         if not app:
             app = QApplication([])
-        dialog = ConfigDialog(self.move_history, self)
+        dialog = ConfigDialog(self)
         # dialog.show()
         if dialog.exec_():
             self.game_mode = dialog.game_mode
@@ -248,6 +250,8 @@ class ChessBoard(QGraphicsScene):
                 self.removeItem(item)
         self.clock = QTime(0, 0, 0, 0)
         self.clock2 = QTime(0, 0, 0, 0)
+        self.analog_clock.update_time(self.clock)
+        self.analog_clock2.update_time(self.clock)
         self.current_player = "white"
         self.label.setText("White move")
         self.analog_clock.is_running = True

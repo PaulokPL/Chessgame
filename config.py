@@ -1,51 +1,22 @@
 import time
-from PySide2.QtCore import QPointF, QCoreApplication
+from PySide2.QtCore import QPointF, QCoreApplication, QTime
 from PySide2.QtWidgets import QDialog, QFormLayout, QInputDialog, QRadioButton, QLineEdit, QPushButton, QMessageBox
 import sqlite3
-import json
 import xml.etree.ElementTree as ET
 
 class ConfigDialog(QDialog):
-    def __init__(self, move_history, chessboard, parent=None):
+    def __init__(self, chessboard, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Configuration")
         self.setModal(True)
         self.initUI()
-        self.move_history = move_history
         self.chessboard = chessboard
+        self.move_history = self.chessboard.move_history
+        self.ip = self.chessboard.ip
+        self.port = self.chessboard.port
 
     def initUI(self):
         layout = QFormLayout(self)
-
-        self.game_mode = "1 player"
-        self.player_radio = QRadioButton("1 player")
-        self.player_radio.toggled.connect(lambda: self.on_radio_button_toggle(self.player_radio))
-        self.player_radio.setChecked(True)
-        self.two_player_radio = QRadioButton("2 player")
-        self.two_player_radio.toggled.connect(lambda: self.on_radio_button_toggle(self.two_player_radio))
-        self.ai_radio = QRadioButton("AI")
-        self.ai_radio.toggled.connect(lambda: self.on_radio_button_toggle(self.ai_radio))
-        layout.addRow("Game mode:", self.player_radio)
-        layout.addRow("", self.two_player_radio)
-        layout.addRow("", self.ai_radio)
-
-        self.ip_input = QLineEdit()
-        self.ip_input.setInputMask("000.000.000.000;_")
-        self.ip_input.textChanged.connect(self.check_ip)
-        self.port_input = QLineEdit()
-        self.port_input.setInputMask("00000")
-        layout.addRow("IP address:", self.ip_input)
-        layout.addRow("Port:", self.port_input)
-
-        ok_button = QPushButton("OK")
-        ok_button.clicked.connect(self.accept)
-        layout.addRow(ok_button)
-
-        save_button = QPushButton("Save Configuration")
-        save_button.clicked.connect(self.save_config)
-        load_button = QPushButton("Load Configuration")
-        load_button.clicked.connect(self.load_config)
-        layout.addRow(save_button, load_button)
 
         save_history_button = QPushButton("Save Game History in SQL")
         save_history_button.clicked.connect(self.save_history)
@@ -59,20 +30,6 @@ class ConfigDialog(QDialog):
         load_history_button_xml.clicked.connect(self.load_history_xml)
         layout.addRow(save_history_button_xml, load_history_button_xml)
 
-    def check_ip(self, text):
-        parts = text.split('.')
-        for part in parts:
-            if part != '':
-                if int(part)>255:
-                    QMessageBox.warning(self, "Error", "Invalid IP address!")
-                    self.ip_input.clear()
-                    break
-
-    def on_radio_button_toggle(self, button):
-        if button.isChecked():
-            self.game_mode = button.text()
-
-
     def save_history(self):
         conn = sqlite3.connect("game_history.db")
         c = conn.cursor()
@@ -81,7 +38,7 @@ class ConfigDialog(QDialog):
                          (id INTEGER PRIMARY KEY, mode TEXT, ip_address TEXT, port TEXT)''')
 
         c.execute("INSERT INTO games (mode, ip_address, port) VALUES (?, ?, ?)",
-                  (self.game_mode, self.ip_input.text(), self.port_input.text()))
+                  (self.chessboard.game_mode, self.ip, self.port))
         game_id = c.lastrowid
 
         c.execute('''CREATE TABLE IF NOT EXISTS moves
@@ -98,13 +55,13 @@ class ConfigDialog(QDialog):
         root = ET.Element("game_history")
 
         mode = ET.SubElement(root, "mode")
-        mode.text = self.game_mode
+        mode.text = self.chessboard.game_mode
 
         ip_address = ET.SubElement(root, "ip_address")
-        ip_address.text = self.ip_input.text()
+        ip_address.text = self.ip
 
         port = ET.SubElement(root, "port")
-        port.text = self.port_input.text()
+        port.text = self.port
 
         moves = ET.SubElement(root, "moves")
         for move in self.move_history:
@@ -112,33 +69,6 @@ class ConfigDialog(QDialog):
 
         tree = ET.ElementTree(root)
         tree.write("game_history.xml")
-
-    def save_config(self):
-        config = {
-            "game_mode": self.game_mode,
-            "ip_address": self.ip_input.text(),
-            "port": self.port_input.text()
-        }
-        with open("config.json", "w") as f:
-            json.dump(config, f)
-        QMessageBox.information(self, "Saved", "Configuration saved successfully.")
-
-    def load_config(self):
-        try:
-            with open("config.json", "r") as f:
-                config = json.load(f)
-            game_mode = config.get("game_mode", "1 player")
-            if game_mode == "1 player":
-                self.player_radio.setChecked(True)
-            elif game_mode == "2 player":
-                self.two_player_radio.setChecked(True)
-            elif game_mode == "AI":
-                self.ai_radio.setChecked(True)
-            self.ip_input.setText(config.get("ip_address", ""))
-            self.port_input.setText(config.get("port", ""))
-            QMessageBox.information(self, "Loaded", "Configuration loaded successfully.")
-        except FileNotFoundError:
-            QMessageBox.warning(self, "Not Found", "Configuration file not found.")
 
     def load_history(self):
         conn = sqlite3.connect("game_history.db")
@@ -195,10 +125,21 @@ class ConfigDialog(QDialog):
                         piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
                         if self.chessboard.current_player == "white":
                             self.chessboard.current_player = "black"
+                            self.chessboard.black_move = True
+                            self.chessboard.white_clock = False
+                            self.chessboard.analog_clock.is_running = False
+                            self.chessboard.analog_clock2.is_running = True
+                            self.chessboard.label.setText("Black move")
                         else:
                             self.chessboard.current_player = "white"
+                            self.chessboard.white_move = True
+                            self.chessboard.black_clock = False
+                            self.chessboard.analog_clock2.is_running = False
+                            self.chessboard.analog_clock.is_running = True
+                            self.chessboard.label.setText("White move")
             time.sleep(0.5)
             QCoreApplication.processEvents()
+
         # replay_dialog = QDialog(self)
         # replay_dialog.setWindowTitle("Game History")
         # replay_dialog.setModal(True)
@@ -241,7 +182,17 @@ class ConfigDialog(QDialog):
                         piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
                         if self.chessboard.current_player == "white":
                             self.chessboard.current_player = "black"
+                            self.chessboard.black_move = True
+                            self.chessboard.white_clock = False
+                            self.chessboard.analog_clock.is_running = False
+                            self.chessboard.analog_clock2.is_running = True
+                            self.chessboard.label.setText("Black move")
                         else:
                             self.chessboard.current_player = "white"
+                            self.chessboard.white_move = True
+                            self.chessboard.black_clock = False
+                            self.chessboard.analog_clock2.is_running = False
+                            self.chessboard.analog_clock.is_running = True
+                            self.chessboard.label.setText("White move")
             time.sleep(0.5)
             QCoreApplication.processEvents()

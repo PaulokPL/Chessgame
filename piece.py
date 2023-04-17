@@ -82,6 +82,12 @@ class ChessPiece(QGraphicsPixmapItem):
     def application_movement(self, new_pos, square):
             self.current_square.piece = None
             actual_xy = (self.current_square.col, self.current_square.row)
+            square1 = self.scene().items(QPointF(self.scene().white_king.x + 10, self.scene().white_king.y + 10),
+                                        Qt.IntersectsItemShape)[0]
+            square1.setBrush(QBrush(QColor(square1.color)))
+            square1 = self.scene().items(QPointF(self.scene().black_king.x + 10, self.scene().black_king.y + 10),
+                                        Qt.IntersectsItemShape)[0]
+            square1.setBrush(QBrush(QColor(square1.color)))
             self.current_square = square
             self.setPos(new_pos)
             self.setZValue(1)
@@ -147,6 +153,8 @@ class ChessPiece(QGraphicsPixmapItem):
             y2 = rank_map[int(self.y/80)]
             string = "{}{}{}{}".format(x, y, x2, y2)
             self.scene().move_history.append(string)
+
+
 
             square.piece = self
             self.has_moved = True

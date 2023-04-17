@@ -6,6 +6,9 @@ class ConfigDialogIP(QDialog):
         self.setWindowTitle("Configuration")
         self.setModal(True)
         self.initUI()
+        self.game_mode = "1 player"
+        self.ip = "192"
+        self.port = "1024"
 
     def initUI(self):
         layout = QFormLayout(self)
@@ -30,15 +33,17 @@ class ConfigDialogIP(QDialog):
         layout.addRow("IP address:", self.ip_input)
         layout.addRow("Port:", self.port_input)
 
-        ok_button = QPushButton("OK")
-        ok_button.clicked.connect(self.accept)
-        layout.addRow(ok_button)
+
 
         save_button = QPushButton("Save Configuration")
         save_button.clicked.connect(self.save_config)
         load_button = QPushButton("Load Configuration")
         load_button.clicked.connect(self.load_config)
         layout.addRow(save_button, load_button)
+
+        ok_button = QPushButton("OK")
+        ok_button.clicked.connect(self.accept_button)
+        layout.addRow(ok_button)
     def check_ip(self, text):
         parts = text.split('.')
         for part in parts:
@@ -48,9 +53,15 @@ class ConfigDialogIP(QDialog):
                     self.ip_input.clear()
                     break
 
+    def accept_button(self):
+        self.ip = self.ip_input.text()
+        self.port = self.port_input.text()
+        self.accept()
+
     def on_radio_button_toggle(self, button):
         if button.isChecked():
             self.game_mode = button.text()
+
     def save_config(self):
         config = {
             "game_mode": self.game_mode,
