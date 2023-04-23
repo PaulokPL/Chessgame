@@ -24,7 +24,7 @@ class ChessBoard(QGraphicsScene):
         self.port = port
         # print(ip,":", port)
         if self.game_mode == "2 player":
-            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             self.client_socket.connect((ip, int(port)))
             receive_thread = threading.Thread(target=self.receive_messages)
             receive_thread.start()

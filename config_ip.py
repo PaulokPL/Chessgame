@@ -26,8 +26,10 @@ class ConfigDialogIP(QDialog):
         layout.addRow("", self.ai_radio)
 
         self.ip_input = QLineEdit()
-        self.ip_input.setInputMask("000.000.000.000;_")
-        self.ip_input.textChanged.connect(self.check_ip)
+        self.ip_input.setInputMask("HHHH:HHHH:HHHH:HHHH:HHHH:HHHH:HHHH:HHHH;_")
+        # self.ip_input.setInputMask("000.000.000.000;_")
+
+        # self.ip_input.textChanged.connect(self.check_ip)
         self.port_input = QLineEdit()
         self.port_input.setInputMask("00000")
         layout.addRow("IP address:", self.ip_input)
@@ -44,14 +46,14 @@ class ConfigDialogIP(QDialog):
         ok_button = QPushButton("OK")
         ok_button.clicked.connect(self.accept_button)
         layout.addRow(ok_button)
-    def check_ip(self, text):
-        parts = text.split('.')
-        for part in parts:
-            if part != '':
-                if int(part)>255:
-                    QMessageBox.warning(self, "Error", "Invalid IP address!")
-                    self.ip_input.clear()
-                    break
+    # def check_ip(self, text):
+    #     parts = text.split('.')
+    #     for part in parts:
+    #         if part != '':
+    #             if int(part)>255:
+    #                 QMessageBox.warning(self, "Error", "Invalid IP address!")
+    #                 self.ip_input.clear()
+    #                 break
 
     def accept_button(self):
         self.ip = self.ip_input.text()
