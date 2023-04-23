@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QDialog, QFormLayout, QInputDialog, QRadioButton, QLineEdit, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QDialog, QFormLayout, QInputDialog, QRadioButton, QLineEdit, QPushButton, QMessageBox
 import json
 class ConfigDialogIP(QDialog):
     def __init__(self, parent=None):

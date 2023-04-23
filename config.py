@@ -1,6 +1,6 @@
 import time
-from PySide2.QtCore import QPointF, QCoreApplication, QTime
-from PySide2.QtWidgets import QDialog, QFormLayout, QInputDialog, QRadioButton, QLineEdit, QPushButton, QMessageBox
+from PyQt5.QtCore import QPointF, QCoreApplication, QTime
+from PyQt5.QtWidgets import QDialog, QFormLayout, QInputDialog, QRadioButton, QLineEdit, QPushButton, QMessageBox
 import sqlite3
 import xml.etree.ElementTree as ET
 

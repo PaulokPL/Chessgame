@@ -1,5 +1,5 @@
-from PySide2.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
-from PySide2 import QtCore
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
+from PyQt5 import QtCore
 
 class PromotionDialog(QDialog):
     def __init__(self):
@@ -41,3 +41,4 @@ class PromotionDialog(QDialog):
 
     def get_selected_piece(self):
         return self.selected_piece
+

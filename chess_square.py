@@ -1,5 +1,5 @@
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 class ChessSquare(QGraphicsRectItem):
     def __init__(self, x, y, size, color):
@@ -11,3 +11,4 @@ class ChessSquare(QGraphicsRectItem):
         self.y = y
         self.row = int(self.y / size)
         self.col = int(self.x / size)
+        self.setZValue(0)

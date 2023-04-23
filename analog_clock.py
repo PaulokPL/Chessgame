@@ -1,6 +1,6 @@
-from PySide2.QtWidgets import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from math import sin, cos, pi
 
 class AnalogClock(QGraphicsWidget):
@@ -69,7 +69,8 @@ class AnalogClock(QGraphicsWidget):
         if self.is_running:
             if event.button() == Qt.LeftButton:
                 if self.scene().white_clock and self.scene().analog_clock.is_running:
-                    # self.scene().send_message()
+                    if self.scene().game_mode == "2 player":
+                        self.scene().send_message()
                     if self.check_mate():
                         self.scene().label.setText("White wins")
                     else:
@@ -90,6 +91,8 @@ class AnalogClock(QGraphicsWidget):
                         square.setBrush(QBrush(QColor(square.color)))
 
                 elif self.scene().black_clock and self.scene().current_player == "black":
+                    if self.scene().game_mode == "2 player":
+                        self.scene().send_message()
                     if self.check_mate():
                         self.scene().label.setText("Black wins")
                         self.is_running = False

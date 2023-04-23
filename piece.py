@@ -1,6 +1,6 @@
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from chess_square import ChessSquare
 from promotiondialog import PromotionDialog
 
@@ -24,7 +24,8 @@ class ChessPiece(QGraphicsPixmapItem):
         self.en_passant = False
         self.check_moves = []
         self.my_king_check = False
-
+        self.setZValue(1)
+        self.filename = filename
     def mousePressEvent(self, event):
         if self.scene().white_move or self.scene().black_move:
             if self.scene().current_player == self.color:
@@ -59,6 +60,7 @@ class ChessPiece(QGraphicsPixmapItem):
                     return
 
                 new_pos = square.mapToScene(square.rect().center()) + QPointF(-40, -40)
+                print(new_pos)
                 if (new_pos.x(), new_pos.y()) in self.possible_moves:
                     self.application_movement(new_pos, square)
                 else:
@@ -80,91 +82,94 @@ class ChessPiece(QGraphicsPixmapItem):
 
 
     def application_movement(self, new_pos, square):
-            self.current_square.piece = None
-            actual_xy = (self.current_square.col, self.current_square.row)
-            square1 = self.scene().items(QPointF(self.scene().white_king.x + 10, self.scene().white_king.y + 10),
-                                        Qt.IntersectsItemShape)[0]
-            square1.setBrush(QBrush(QColor(square1.color)))
-            square1 = self.scene().items(QPointF(self.scene().black_king.x + 10, self.scene().black_king.y + 10),
-                                        Qt.IntersectsItemShape)[0]
-            square1.setBrush(QBrush(QColor(square1.color)))
-            self.current_square = square
-            self.setPos(new_pos)
-            self.setZValue(1)
-            if self.piece_type == "king":
-                if self.color == "white":
-                    self.scene().white_king = self
-                else:
-                    self.scene().black_king = self
-                if abs(self.x - new_pos.x()) > 90:
-                    if new_pos.x() == 480:
-                        square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
-                        piece1 = square1[0].piece
-                        piece1.setPos(400, piece1.y)
-                        piece1.x = 400
-                        piece1.setZValue(1)
-                        square1[0].piece = None
-                        square2 = self.scene().items(QPointF(440, new_pos.y() + 10), Qt.IntersectsItemShape)
-                        square2[0].piece = piece1
-                        piece1.current_square = square2[0]
-                    else:
-                        square1 = self.scene().items(QPointF(0, new_pos.y() + 10), Qt.IntersectsItemShape)
-                        piece1 = square1[0].piece
-                        piece1.setPos(240, piece1.y)
-                        piece1.x = 240
-                        piece1.setZValue(1)
-                        square1[0].piece = None
-                        square2 = self.scene().items(QPointF(240, new_pos.y() + 10), Qt.IntersectsItemShape)
-                        square2[0].piece = piece1
-                        piece1.current_square = square2[0]
-            if self.piece_type == "pawn":
-                if abs(new_pos.y() - self.y) > 90:
-                    self.en_passant = True
-                else:
-                    self.en_passant = False
-                if abs(new_pos.x() - self.x) > 60:
-                    if not self.is_square_occupied_TF(new_pos.x(), new_pos.y()):
-                        if self.color == "white":
-                            square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() + 90),
-                                                         Qt.IntersectsItemShape)
-                            self.scene().white_pieces.remove(square1[0].piece)
-                            self.scene().removeItem(square1[0].piece)
-                            square1[0].piece = None
-                        else:
-                            square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() - 60),
-                                                         Qt.IntersectsItemShape)
-                            self.scene().white_pieces.remove(square1[0].piece)
-                            self.scene().removeItem(square1[0].piece)
-                            square1[0].piece = None
-                if new_pos.y() == 0 or new_pos.y() == 560:
-                    self.pop_up_window()
-
-            self.x = new_pos.x()
-            self.y = new_pos.y()
-            if square.piece is not None:
-                self.scene().white_pieces.remove(square.piece)
-                self.scene().removeItem(square.piece)
-
-            file_map = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h'}
-            rank_map = {7: '1', 6: '2', 5: '3', 4: '4', 3: '5', 2: '6', 1: '7', 0: '8'}
-            x = file_map[actual_xy[0]]
-            y = rank_map[actual_xy[1]]
-            x2 = file_map[int(self.x/80)]
-            y2 = rank_map[int(self.y/80)]
-            string = "{}{}{}{}".format(x, y, x2, y2)
-            self.scene().move_history.append(string)
-
-
-
-            square.piece = self
-            self.has_moved = True
-            if self.scene().white_move:
-                self.scene().white_move = False
-                self.scene().white_clock = True
+        self.current_square.piece = None
+        actual_xy = (self.current_square.col, self.current_square.row)
+        square1 = self.scene().items(QPointF(self.scene().white_king.x + 10, self.scene().white_king.y + 10),
+                                    Qt.IntersectsItemShape)[0]
+        square1.setBrush(QBrush(QColor(square1.color)))
+        square1 = self.scene().items(QPointF(self.scene().black_king.x + 10, self.scene().black_king.y + 10),
+                                    Qt.IntersectsItemShape)[0]
+        square1.setBrush(QBrush(QColor(square1.color)))
+        self.current_square = square
+        self.setPos(new_pos)
+        self.setZValue(1)
+        if self.piece_type == "king":
+            if self.color == "white":
+                self.scene().white_king = self
             else:
-                self.scene().black_move = False
-                self.scene().black_clock = True
+                self.scene().black_king = self
+            if abs(self.x - new_pos.x()) > 90:
+                if new_pos.x() == 480:
+                    square1 = self.scene().items(QPointF(570, new_pos.y() + 10), Qt.IntersectsItemShape)
+                    piece1 = square1[0].piece
+                    piece1.setPos(400, piece1.y)
+                    piece1.x = 400
+                    piece1.setZValue(1)
+                    square1[0].piece = None
+                    square2 = self.scene().items(QPointF(440, new_pos.y() + 10), Qt.IntersectsItemShape)
+                    square2[0].piece = piece1
+                    piece1.current_square = square2[0]
+                else:
+                    square1 = self.scene().items(QPointF(0, new_pos.y() + 10), Qt.IntersectsItemShape)
+                    piece1 = square1[0].piece
+                    piece1.setPos(240, piece1.y)
+                    piece1.x = 240
+                    piece1.setZValue(1)
+                    square1[0].piece = None
+                    square2 = self.scene().items(QPointF(240, new_pos.y() + 10), Qt.IntersectsItemShape)
+                    square2[0].piece = piece1
+                    piece1.current_square = square2[0]
+        if self.piece_type == "pawn":
+            if abs(new_pos.y() - self.y) > 90:
+                self.en_passant = True
+            else:
+                self.en_passant = False
+            if abs(new_pos.x() - self.x) > 60:
+                if not self.is_square_occupied_TF(new_pos.x(), new_pos.y()):
+                    if self.color == "white":
+                        square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() + 90),
+                                                     Qt.IntersectsItemShape)
+                        self.scene().white_pieces.remove(square1[0].piece)
+                        self.scene().removeItem(square1[0].piece)
+                        square1[0].piece = None
+                    else:
+                        square1 = self.scene().items(QPointF(new_pos.x() + 10, new_pos.y() - 60),
+                                                     Qt.IntersectsItemShape)
+                        self.scene().white_pieces.remove(square1[0].piece)
+                        self.scene().removeItem(square1[0].piece)
+                        square1[0].piece = None
+            if new_pos.y() == 0 or new_pos.y() == 560:
+                self.pop_up_window()
 
+        self.x = new_pos.x()
+        self.y = new_pos.y()
+        if square.piece is not None:
+            self.scene().white_pieces.remove(square.piece)
+            self.scene().removeItem(square.piece)
+
+        file_map = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h'}
+        rank_map = {7: '1', 6: '2', 5: '3', 4: '4', 3: '5', 2: '6', 1: '7', 0: '8'}
+        x = file_map[actual_xy[0]]
+        y = rank_map[actual_xy[1]]
+        x2 = file_map[int(self.x/80)]
+        y2 = rank_map[int(self.y/80)]
+        string = "{}{}{}{}".format(x, y, x2, y2)
+        self.scene().move_history.append(string)
+
+        self.scene().update()
+        square.piece = self
+        self.has_moved = True
+        if self.scene().white_move:
+            self.scene().white_move = False
+            self.scene().white_clock = True
+        else:
+            self.scene().black_move = False
+            self.scene().black_clock = True
+
+        # for pie in self.scene().items():
+        #     if isinstance(pie, ChessPiece):
+        #         self.scene().removeItem(pie)
+        #         self.scene().addItem(pie)
 
 
     def pop_up_window(self):

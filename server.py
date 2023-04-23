@@ -1,8 +1,8 @@
 import socket
 import threading
 
-HOST = '192.168.18.106'
-PORT = 5005
+HOST = '192.168.0.123'
+PORT = 0
 
 clients = []
 
@@ -42,9 +42,10 @@ def start_server():
 
     # tworzenie gniazda serwera
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((HOST, PORT))
+    server_socket.bind((HOST, 0))
     server_socket.listen()
 
+    print(server_socket.getsockname())
     print(f"[LISTENING] Server is listening on {HOST}:{PORT}")
 
     while True:

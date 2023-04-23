@@ -1,10 +1,10 @@
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
-from PySide2.QtCore import QResource
+from PyQt5.QtCore import QVariant, QTime, QTimer, QMetaObject, Qt, Q_ARG, QPointF, pyqtSlot, QObject
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import QResource
 from piece import ChessPiece
 from chess_square import ChessSquare
-from PySide2.QtWidgets import QGraphicsProxyWidget, QPushButton
+from PyQt5.QtWidgets import QGraphicsProxyWidget, QPushButton
 from analog_clock import  AnalogClock
 from config import ConfigDialog
 import time
@@ -23,11 +23,11 @@ class ChessBoard(QGraphicsScene):
         self.ip = ip
         self.port = port
         # print(ip,":", port)
-        # if self.game_mode == "2 players":
-        # self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # self.client_socket.connect((ip, int(port)))
-        # receive_thread = threading.Thread(target=self.receive_messages)
-        # receive_thread.start()
+        if self.game_mode == "2 player":
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client_socket.connect((ip, int(port)))
+            receive_thread = threading.Thread(target=self.receive_messages)
+            receive_thread.start()
         self.current_player = "white"
         self.line_edit = QLineEdit()
         self.line_edit.setGeometry(100, 721, 300, 30)
@@ -83,111 +83,113 @@ class ChessBoard(QGraphicsScene):
         QResource.registerResource("chess_pieces.qrc")
 
 
-        # for row in range(8):
-        #     for col in range(8):
-        #         x = col * self.square_size
-        #         y = row * self.square_size
-        #
-        #         if (row + col) % 2 == 0:
-        #             color = "white"
-        #         else:
-        #             color = "grey"
-        #
-        #         square = ChessSquare(x, y, self.square_size, color)
-        #         self.addItem(square)
-        #
-        #         if row in [0, 1, 6, 7]:
-        #             if row in [6, 7]:
-        #                 player = "white"
-        #                 color_piece = "white"
-        #                 if row in [0, 7]:
-        #                     if col == 0 or col == 7:
-        #                         piece_type = "rook"
-        #                         filename = ":/chess_pieces/icons/white_rook.png"
-        #                     elif col == 1 or col == 6:
-        #                         piece_type = "knight"
-        #                         filename = ":/chess_pieces/icons/white_knight.png"
-        #                     elif col == 2 or col == 5:
-        #                         piece_type = "bishop"
-        #                         filename = ":/chess_pieces/icons/white_bishop.png"
-        #                     elif col == 3:
-        #                         piece_type = "queen"
-        #                         filename = ":/chess_pieces/icons/white_queen.png"
-        #                     else:
-        #                         piece_type = "king"
-        #                         filename = ":/chess_pieces/icons/white_king.png"
-        #                 else:
-        #                     piece_type = "pawn"
-        #                     filename = ":/chess_pieces/icons/white_pawn.png"
-        #             else:
-        #                 player = "black"
-        #                 color_piece = "black"
-        #                 if row in [0, 7]:
-        #                     if col == 0 or col == 7:
-        #                         piece_type = "rook"
-        #                         filename = ":/chess_pieces/icons/black_rook.png"
-        #                     elif col == 1 or col == 6:
-        #                         piece_type = "knight"
-        #                         filename = ":/chess_pieces/icons/black_knight.png"
-        #                     elif col == 2 or col == 5:
-        #                         piece_type = "bishop"
-        #                         filename = ":/chess_pieces/icons/black_bishop.png"
-        #                     elif col == 3:
-        #                         piece_type = "queen"
-        #                         filename = ":/chess_pieces/icons/black_queen.png"
-        #                     else:
-        #                         piece_type = "king"
-        #                         filename = ":/chess_pieces/icons/black_king.png"
-        #                 else:
-        #                     piece_type = "pawn"
-        #                     filename = ":/chess_pieces/icons/black_pawn.png"
-        #             piece = ChessPiece(x, y, self.square_size, color_piece, player, piece_type, filename)
-        #             if piece.piece_type == "king":
-        #                 if piece.color == "white":
-        #                     self.white_king = piece
-        #                 else:
-        #                     self.black_king = piece
-        #             piece.current_square = square
-        #             square.piece = piece
-        #             self.addItem(piece)
-        #             self.white_pieces.append(piece)
+
     def receive_messages(self):
         while True:
-            message = self.client_socket.recv(4096).decode()
+            message = self.client_socket.recv(1024).decode()
             self.move_history.append(message)
+            print(self.move_history)
+
             file_map = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
             rank_map = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
             x_s = file_map[message[0]] * self.square_size
             y_s = rank_map[message[1]] * self.square_size
             x_d = file_map[message[2]] * self.square_size
             y_d = rank_map[message[3]] * self.square_size
-            new_tuple_src = tuple((x_s, y_s))
-            new_tuple_dst = tuple((x_d, y_d))
-            new_tuple_dst_10 = tuple((x_d + 10, y_d + 10))
-            src_square = self.items(QPointF(*new_tuple_src))
-            dst_square = self.items(QPointF(*new_tuple_dst_10))
-            piece = src_square[0].piece
-            if piece is not None:
-                if piece.color == self.current_player:
-                    piece.possible_moves = piece.moves_continue()
-                    if new_tuple_dst in piece.possible_moves:
-                        piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
-                        if self.current_player == "white":
-                            self.current_player = "black"
-                            self.black_move = True
-                            self.white_clock = False
-                            self.analog_clock.is_running = False
-                            self.analog_clock2.is_running = True
-                            self.label.setText("Black move")
-                        else:
-                            self.current_player = "white"
-                            self.white_move = True
-                            self.black_clock = False
-                            self.analog_clock2.is_running = False
-                            self.analog_clock.is_running = True
-                            self.label.setText("White move")
-            time.sleep(0.5)
-            QCoreApplication.processEvents()
+            # print(type(x_d))
+
+            QMetaObject.invokeMethod(self, "function", Qt.QueuedConnection,
+                                     Q_ARG(QVariant, x_s),
+                                     Q_ARG(QVariant, y_s),
+                                     Q_ARG(QVariant, x_d),
+                                     Q_ARG(QVariant, y_d)
+                                     )
+            # function(x_s, y_s, x_d, y_d)
+            # new_tuple_src = tuple((x_s, y_s))
+            # new_tuple_dst = tuple((x_d, y_d))
+            # new_tuple_dst_10 = tuple((x_d + 10, y_d + 10))
+            # src_square = self.items(QPointF(*new_tuple_src))
+            # dst_square = self.items(QPointF(*new_tuple_dst_10))
+            # piece = src_square[0].piece
+            # if piece is not None:
+            #     if piece.color == self.current_player:
+            #         piece.possible_moves = piece.moves_continue()
+            #         if new_tuple_dst in piece.possible_moves:
+            #             piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
+            #             piece.update()
+            #             if self.current_player == "white":
+            #                 self.current_player = "black"
+            #                 self.black_move = True
+            #                 self.white_clock = False
+            #                 self.analog_clock.is_running = False
+            #                 self.analog_clock2.is_running = True
+            #                 self.label.setText("Black move")
+            #             else:
+            #                 self.current_player = "white"
+            #                 self.white_move = True
+            #                 self.black_clock = False
+            #                 self.analog_clock2.is_running = False
+            #                 self.analog_clock.is_running = True
+            #                 self.label.setText("White move")
+    @pyqtSlot(QVariant, QVariant,QVariant,QVariant)
+    def function(self, xs, ys, xd, yd):
+        new_tuple_src = tuple((xs, ys))
+        new_tuple_dst = tuple((xd, yd))
+        new_tuple_dst_10 = tuple((xd + 10, yd + 10))
+        src_square = self.items(QPointF(*new_tuple_src))
+        dst_square = self.items(QPointF(*new_tuple_dst_10))
+        piece = src_square[0].piece
+        if piece is not None:
+            if piece.color == self.current_player:
+                piece.possible_moves = piece.moves_continue()
+                if new_tuple_dst in piece.possible_moves:
+                    piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
+                    piece.update()
+                    if self.current_player == "white":
+                        self.current_player = "black"
+                        self.black_move = True
+                        self.white_clock = False
+                        self.analog_clock.is_running = False
+                        self.analog_clock2.is_running = True
+                        self.label.setText("Black move")
+                    else:
+                        self.current_player = "white"
+                        self.white_move = True
+                        self.black_clock = False
+                        self.analog_clock2.is_running = False
+                        self.analog_clock.is_running = True
+                        self.label.setText("White move")
+
+
+            # itemki = self.items()
+            # for item in itemki:
+            #     if isinstance(item, ChessPiece):
+            #         piecex = item.x
+            #         piecey = item.y
+            #         piececolor = item.color
+            #         piecetype = item.piece_type
+            #         pieceplayer = item.player
+            #         piecefilename = item.filename
+            #         self.white_pieces.remove(item)
+            #         self.removeItem(item)
+            #         piece222 = ChessPiece(piecex, piecey, self.square_size, piececolor, pieceplayer, piecetype, piecefilename)
+            #         if piece222.piece_type == "king":
+            #             if piece222.color == "white":
+            #                 self.white_king = piece222
+            #             else:
+            #                 self.black_king = piece222
+            #         square222 = self.items(QPointF(piece222.x + 10, piece222.y + 10), Qt.IntersectsItemShape)[0]
+            #         piece222.current_square = square222
+            #         square222.piece = piece222
+            #         self.addItem(piece222)
+            #         piece222.setPos(piece222.x, piece222.y)
+            #         print(piece222.pos().x(), piece222.pos().y())
+            #         piece222.setZValue(1)
+            #         self.white_pieces.append(piece222)
+            #     elif isinstance(item, ChessSquare):
+            #         self.removeItem(item)
+            # self.update()
+
 
     def send_message(self):
         message = self.move_history[-1]
