@@ -88,7 +88,6 @@ class ChessBoard(QGraphicsScene):
         while True:
             message = self.client_socket.recv(1024).decode()
             self.move_history.append(message)
-            print(self.move_history)
 
             file_map = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
             rank_map = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
@@ -96,7 +95,6 @@ class ChessBoard(QGraphicsScene):
             y_s = rank_map[message[1]] * self.square_size
             x_d = file_map[message[2]] * self.square_size
             y_d = rank_map[message[3]] * self.square_size
-            # print(type(x_d))
 
             QMetaObject.invokeMethod(self, "function", Qt.QueuedConnection,
                                      Q_ARG(QVariant, x_s),
@@ -104,33 +102,6 @@ class ChessBoard(QGraphicsScene):
                                      Q_ARG(QVariant, x_d),
                                      Q_ARG(QVariant, y_d)
                                      )
-            # function(x_s, y_s, x_d, y_d)
-            # new_tuple_src = tuple((x_s, y_s))
-            # new_tuple_dst = tuple((x_d, y_d))
-            # new_tuple_dst_10 = tuple((x_d + 10, y_d + 10))
-            # src_square = self.items(QPointF(*new_tuple_src))
-            # dst_square = self.items(QPointF(*new_tuple_dst_10))
-            # piece = src_square[0].piece
-            # if piece is not None:
-            #     if piece.color == self.current_player:
-            #         piece.possible_moves = piece.moves_continue()
-            #         if new_tuple_dst in piece.possible_moves:
-            #             piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
-            #             piece.update()
-            #             if self.current_player == "white":
-            #                 self.current_player = "black"
-            #                 self.black_move = True
-            #                 self.white_clock = False
-            #                 self.analog_clock.is_running = False
-            #                 self.analog_clock2.is_running = True
-            #                 self.label.setText("Black move")
-            #             else:
-            #                 self.current_player = "white"
-            #                 self.white_move = True
-            #                 self.black_clock = False
-            #                 self.analog_clock2.is_running = False
-            #                 self.analog_clock.is_running = True
-            #                 self.label.setText("White move")
     @pyqtSlot(QVariant, QVariant,QVariant,QVariant)
     def function(self, xs, ys, xd, yd):
         new_tuple_src = tuple((xs, ys))

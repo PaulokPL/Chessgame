@@ -1,7 +1,7 @@
 import socket
 import threading
 
-HOST = '192.168.0.19'
+HOST = 'localhost'
 PORT = 0
 
 clients = []
