@@ -29,13 +29,14 @@ class ChessPiece(QGraphicsPixmapItem):
     def mousePressEvent(self, event):
         if self.scene().white_move or self.scene().black_move:
             if self.scene().current_player == self.color:
-                if event.button() == Qt.LeftButton:
-                    self.selected = True
-                    self.setOpacity(0.5)
-                    self.offset = event.pos()
-                    self.setZValue(1)
-                    self.possible_moves = self.moves_continue()
-                    self.highlight_moves()
+                if self.scene().game_mode != "AI" or self.scene().current_player == "white":
+                    if event.button() == Qt.LeftButton:
+                        self.selected = True
+                        self.setOpacity(0.5)
+                        self.offset = event.pos()
+                        self.setZValue(1)
+                        self.possible_moves = self.moves_continue()
+                        self.highlight_moves()
     def mouseMoveEvent(self, event):
         if self.selected:
             new_pos = event.scenePos() - self.offset
@@ -60,7 +61,6 @@ class ChessPiece(QGraphicsPixmapItem):
                     return
 
                 new_pos = square.mapToScene(square.rect().center()) + QPointF(-40, -40)
-                print(new_pos)
                 if (new_pos.x(), new_pos.y()) in self.possible_moves:
                     self.application_movement(new_pos, square)
                 else:
@@ -170,7 +170,6 @@ class ChessPiece(QGraphicsPixmapItem):
         #     if isinstance(pie, ChessPiece):
         #         self.scene().removeItem(pie)
         #         self.scene().addItem(pie)
-
 
     def pop_up_window(self):
         app = QApplication.instance()
@@ -414,8 +413,8 @@ class ChessPiece(QGraphicsPixmapItem):
         return moves
 
     def moves_continue(self):
-        x = self.scenePos().x()
-        y = self.scenePos().y()
+        x = self.x
+        y = self.y
         possible_moves = self.get_possible_moves(x, y)
         possible_moves = [mov for mov in possible_moves if self.is_square_occupied_PT(*mov) != "king"]
         if self.color == "white":
@@ -590,20 +589,23 @@ class ChessPiece(QGraphicsPixmapItem):
             square.setBrush(QBrush(QColor(square.color)))
 
     def is_square_occupied_C(self, x, y):
-        items = self.scene().items(QPointF(x+10, y+10))
-        square = items[0]
-        if square.piece is not None:
-            return square.piece.color
+        for items in self.scene().items(QPointF(x + 10, y + 10)):
+            if isinstance(items, ChessSquare):
+                square = items
+                if square.piece is not None:
+                    return square.piece.color
         return None
     def is_square_occupied_TF(self, x, y):
-        items = self.scene().items(QPointF(x + 10, y + 10))
-        square = items[0]
-        if square.piece is not None:
-            return True
+        for items in self.scene().items(QPointF(x + 10, y + 10)):
+            if isinstance(items, ChessSquare):
+                square = items
+                if square.piece is not None:
+                    return True
         return False
     def is_square_occupied_PT(self, x, y):
-        items = self.scene().items(QPointF(x+10, y+10))
-        square = items[0]
-        if square.piece is not None:
-            return square.piece.piece_type
+        for items in self.scene().items(QPointF(x + 10, y + 10)):
+            if isinstance(items, ChessSquare):
+                square = items
+                if square.piece is not None:
+                    return square.piece.piece_type
         return None

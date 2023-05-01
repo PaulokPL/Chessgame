@@ -89,29 +89,32 @@ class AnalogClock(QGraphicsWidget):
                     else:
                         square = self.scene().items(QPointF(black_king.x + 10, black_king.y + 10), Qt.IntersectsItemShape)[0]
                         square.setBrush(QBrush(QColor(square.color)))
+                    if self.scene().game_mode == "AI":
+                        self.scene().ai_movement()
 
                 elif self.scene().black_clock and self.scene().current_player == "black":
                     if self.scene().game_mode == "2 player":
                         self.scene().send_message()
-                    if self.check_mate():
-                        self.scene().label.setText("Black wins")
-                        self.is_running = False
-                    else:
-                        square = self.scene().items(QPointF(self.scene().black_king.x + 10, self.scene().black_king.y + 10), Qt.IntersectsItemShape)[0]
-                        square.setBrush(QBrush(QColor(square.color)))
-                        self.is_running = False
-                        self.scene().current_player = "white"
-                        self.scene().white_move = True
-                        self.scene().black_clock = False
-                        self.scene().analog_clock.is_running = True
-                        self.scene().label.setText("White move")
-                    white_king = self.scene().white_king
-                    if white_king.is_in_check(white_king.x, white_king.y):
-                        square = self.scene().items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[0]
-                        square.setBrush(QBrush(QColor("red")))
-                    else:
-                        square = self.scene().items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[0]
-                        square.setBrush(QBrush(QColor(square.color)))
+                    if self.scene().game_mode != "AI":
+                        if self.check_mate():
+                            self.scene().label.setText("Black wins")
+                            self.is_running = False
+                        else:
+                            square = self.scene().items(QPointF(self.scene().black_king.x + 10, self.scene().black_king.y + 10), Qt.IntersectsItemShape)[0]
+                            square.setBrush(QBrush(QColor(square.color)))
+                            self.is_running = False
+                            self.scene().current_player = "white"
+                            self.scene().white_move = True
+                            self.scene().black_clock = False
+                            self.scene().analog_clock.is_running = True
+                            self.scene().label.setText("White move")
+                        white_king = self.scene().white_king
+                        if white_king.is_in_check(white_king.x, white_king.y):
+                            square = self.scene().items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[0]
+                            square.setBrush(QBrush(QColor("red")))
+                        else:
+                            square = self.scene().items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[0]
+                            square.setBrush(QBrush(QColor(square.color)))
 
 
     def check_mate(self):

@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QFormLayout, QInputDialog, QRadioButton, QLineEdit, QPushButton, QMessageBox
+from PyQt5 import QtCore
 import json
+import server
 class ConfigDialogIP(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -12,7 +14,7 @@ class ConfigDialogIP(QDialog):
 
     def initUI(self):
         layout = QFormLayout(self)
-
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
         self.game_mode = "1 player"
         self.player_radio = QRadioButton("1 player")
         self.player_radio.toggled.connect(lambda: self.on_radio_button_toggle(self.player_radio))

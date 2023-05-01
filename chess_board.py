@@ -1,3 +1,5 @@
+import random
+
 from PyQt5.QtCore import QVariant, QTime, QTimer, QMetaObject, Qt, Q_ARG, QPointF, pyqtSlot, QObject
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -10,6 +12,7 @@ from config import ConfigDialog
 import time
 import socket
 import threading
+import numpy as np
 class ChessBoard(QGraphicsScene):
     def __init__(self, mode, ip, port, parent=None):
         super().__init__(parent)
@@ -82,6 +85,8 @@ class ChessBoard(QGraphicsScene):
         self.set_scene()
         QResource.registerResource("chess_pieces.qrc")
 
+        self.white_score = 1290
+        self.black_score = 1290
 
 
     def receive_messages(self):
@@ -130,37 +135,6 @@ class ChessBoard(QGraphicsScene):
                         self.analog_clock2.is_running = False
                         self.analog_clock.is_running = True
                         self.label.setText("White move")
-
-
-            # itemki = self.items()
-            # for item in itemki:
-            #     if isinstance(item, ChessPiece):
-            #         piecex = item.x
-            #         piecey = item.y
-            #         piececolor = item.color
-            #         piecetype = item.piece_type
-            #         pieceplayer = item.player
-            #         piecefilename = item.filename
-            #         self.white_pieces.remove(item)
-            #         self.removeItem(item)
-            #         piece222 = ChessPiece(piecex, piecey, self.square_size, piececolor, pieceplayer, piecetype, piecefilename)
-            #         if piece222.piece_type == "king":
-            #             if piece222.color == "white":
-            #                 self.white_king = piece222
-            #             else:
-            #                 self.black_king = piece222
-            #         square222 = self.items(QPointF(piece222.x + 10, piece222.y + 10), Qt.IntersectsItemShape)[0]
-            #         piece222.current_square = square222
-            #         square222.piece = piece222
-            #         self.addItem(piece222)
-            #         piece222.setPos(piece222.x, piece222.y)
-            #         print(piece222.pos().x(), piece222.pos().y())
-            #         piece222.setZValue(1)
-            #         self.white_pieces.append(piece222)
-            #     elif isinstance(item, ChessSquare):
-            #         self.removeItem(item)
-            # self.update()
-
 
     def send_message(self):
         message = self.move_history[-1]
@@ -232,8 +206,6 @@ class ChessBoard(QGraphicsScene):
                     piece.application_movement(QPointF(*new_tuple_dst), dst_square[0])
         self.line_edit.clear()
 
-
-
     def parse_notation(self,notation):
         file_map = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
         rank_map = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
@@ -265,7 +237,6 @@ class ChessBoard(QGraphicsScene):
         #                 self.white_pieces.remove(item)
         #                 self.removeItem(item)
         #         self.set_scene()
-
 
     def set_scene(self):
         self.white_pieces = []
@@ -354,3 +325,244 @@ class ChessBoard(QGraphicsScene):
                     square.piece = piece
                     self.addItem(piece)
                     self.white_pieces.append(piece)
+
+    def evaluate(self):
+        piece_values = {
+            'pawn': 10,
+            'knight': 30,
+            'bishop': 30,
+            'rook': 50,
+            'queen': 90,
+            'king': 900
+        }
+        score = 0
+        for itemes in self.white_pieces:
+            if itemes.color == "black":
+                score -= piece_values[itemes.piece_type]
+            else:
+                score += piece_values[itemes.piece_type]
+        return score
+
+
+    def minimax(self, depth, is_maximizing_player, alpha, beta):
+        if depth == 0:
+            return self.evaluate(), None, None
+
+        if is_maximizing_player:
+            best_move = None
+            best_piece = None
+            best_score = -float('inf')
+            for pieces in self.white_pieces:
+                if pieces.color == "white":
+                    moves = pieces.moves_continue()
+                    for move in moves:
+                        if pieces.piece_type == "pawn" and abs(
+                                move[0] - pieces.x) > 60 and not pieces.is_square_occupied_TF(move[0], move[1]):
+                            if pieces.color == "white":
+                                old_xy = [pieces.x, pieces.y]
+                                old_square = pieces.current_square
+                                pieces.current_square.piece = None
+                                new_move = (move[0] + 10, move[1] + 10)
+                                squares = self.items(QPointF(*new_move), Qt.IntersectsItemShape)
+                                pieces.current_square = squares[0]
+                                squares[0].piece = pieces
+                                square5 = self.items(QPointF(move[0] + 10, move[1] + 90),
+                                                     Qt.IntersectsItemShape)
+                                remember = square5[0].piece
+                                pieces.x = new_move[0]
+                                pieces.y = new_move[1]
+                                self.white_pieces.remove(square5[0].piece)
+                                square5[0].piece = None
+                                score, _, _ = self.minimax(depth - 1, False, alpha, beta)
+
+                                square5[0].piece = remember
+                                self.white_pieces.append(square5[0].piece)
+                                pieces.current_square.piece = None
+                                pieces.current_square = old_square
+                                pieces.current_square.piece = pieces
+                                pieces.x = old_xy[0]
+                                pieces.y = old_xy[1]
+                            else:
+                                old_xy = [pieces.x, pieces.y]
+                                old_square = pieces.current_square
+                                pieces.current_square.piece = None
+                                new_move = (move[0] + 10, move[1] + 10)
+                                squares = self.items(QPointF(*new_move), Qt.IntersectsItemShape)
+                                pieces.current_square = squares[0]
+                                squares[0].piece = pieces
+                                square5 = self.items(QPointF(move[0] + 10, move[1] - 60),
+                                                     Qt.IntersectsItemShape)
+                                remember = square5[0].piece
+                                self.white_pieces.remove(square5[0].piece)
+                                square5[0].piece = None
+                                pieces.x = new_move[0]
+                                pieces.y = new_move[1]
+                                score, _, _ = self.minimax(depth - 1, False, alpha, beta)
+                                square5[0].piece = remember
+                                self.white_pieces.append(square5[0].piece)
+                                pieces.current_square.piece = None
+                                pieces.current_square = old_square
+                                pieces.current_square.piece = pieces
+                                pieces.x = old_xy[0]
+                                pieces.y = old_xy[1]
+                        else:
+                            old_xy = [pieces.x, pieces.y]
+                            old_square = pieces.current_square
+                            pieces.current_square.piece = None
+                            new_move = (move[0] + 10, move[1] + 10)
+                            squares = self.items(QPointF(*new_move), Qt.IntersectsItemShape)
+                            remember_new_square = squares[0].piece
+                            pieces.current_square = squares[0]
+                            pieces.x = new_move[0]
+                            pieces.y = new_move[1]
+                            if remember_new_square is not None:
+                                self.white_pieces.remove(squares[0].piece)
+                            squares[0].piece = pieces
+                            score, _, _ = self.minimax(depth - 1, False, alpha, beta)
+                            pieces.current_square.piece = None
+                            pieces.current_square = old_square
+                            pieces.current_square.piece = pieces
+                            squares[0].piece = remember_new_square
+                            pieces.x = old_xy[0]
+                            pieces.y = old_xy[1]
+                            if squares[0].piece is not None:
+                                self.white_pieces.append(squares[0].piece)
+                        if score > best_score:
+                            best_score = score
+                            best_move = move
+                            best_piece = pieces
+                        alpha = max(alpha, score)
+                        if beta > alpha:
+                            break
+            return best_score, best_move, best_piece
+        else:
+            best_move = None
+            best_piece = None
+            best_score = float('inf')
+            for pieces in self.white_pieces:
+                if pieces.color == "black":
+                    moves = pieces.moves_continue()
+                    for move in moves:
+                        if pieces.piece_type == "pawn" and abs(
+                                move[0] - pieces.x) > 60 and not pieces.is_square_occupied_TF(move[0], move[1]):
+                            if pieces.color == "white":
+                                old_xy = [pieces.x, pieces.y]
+                                old_square = pieces.current_square
+                                pieces.current_square.piece = None
+                                new_move = (move[0] + 10, move[1] + 10)
+                                squares = self.items(QPointF(*new_move), Qt.IntersectsItemShape)
+                                pieces.current_square = squares[0]
+                                squares[0].piece = pieces
+                                pieces.x = new_move[0]
+                                pieces.y = new_move[1]
+                                square5 = self.items(QPointF(move[0] + 10, move[1] + 90),
+                                                     Qt.IntersectsItemShape)
+                                remember = square5[0].piece
+                                self.white_pieces.remove(square5[0].piece)
+                                square5[0].piece = None
+                                score, _, _ = self.minimax(depth - 1, True, alpha, beta)
+                                square5[0].piece = remember
+                                self.white_pieces.append(square5[0].piece)
+                                pieces.current_square.piece = None
+                                pieces.current_square = old_square
+                                pieces.current_square.piece = pieces
+                                pieces.x = old_xy[0]
+                                pieces.y = old_xy[1]
+                            else:
+                                old_xy = [pieces.x, pieces.y]
+                                old_square = pieces.current_square
+                                pieces.current_square.piece = None
+                                new_move = (move[0] + 10, move[1] + 10)
+                                squares = self.items(QPointF(*new_move), Qt.IntersectsItemShape)
+                                pieces.current_square = squares[0]
+                                squares[0].piece = pieces
+                                pieces.x = new_move[0]
+                                pieces.y = new_move[1]
+                                square5 = self.items(QPointF(move[0] + 10, move[1] - 60),
+                                                     Qt.IntersectsItemShape)
+                                remember = square5[0].piece
+                                self.white_pieces.remove(square5[0].piece)
+                                square5[0].piece = None
+                                score, _, _= self.minimax(depth - 1, True, alpha, beta)
+                                square5[0].piece = remember
+                                self.white_pieces.append(square5[0].piece)
+                                pieces.current_square.piece = None
+                                pieces.current_square = old_square
+                                pieces.current_square.piece = pieces
+                                pieces.x = old_xy[0]
+                                pieces.y = old_xy[1]
+                        else:
+                            old_xy = [pieces.x, pieces.y]
+                            old_square = pieces.current_square
+                            pieces.current_square.piece = None
+                            new_move = (move[0] + 10, move[1] + 10)
+                            squares = self.items(QPointF(*new_move), Qt.IntersectsItemShape)
+                            remember_new_square = squares[0].piece
+                            pieces.current_square = squares[0]
+                            pieces.x = new_move[0]
+                            pieces.y = new_move[1]
+                            if remember_new_square is not None:
+                                self.white_pieces.remove(squares[0].piece)
+                            squares[0].piece = pieces
+                            score, _, _= self.minimax(depth - 1, True, alpha, beta)
+                            pieces.current_square.piece = None
+                            pieces.current_square = old_square
+                            pieces.current_square.piece = pieces
+                            squares[0].piece = remember_new_square
+                            pieces.x = old_xy[0]
+                            pieces.y = old_xy[1]
+                            if squares[0].piece is not None:
+                                self.white_pieces.append(squares[0].piece)
+                        if score < best_score:
+                            best_score = score
+                            best_move = move
+                            best_piece = pieces
+                        beta = min(beta, score)
+                        if beta < alpha:
+                            break
+            return best_score, best_move, best_piece
+
+    def ai_movement(self):
+        best_piece = None
+        best_mov = None
+        possiblement = []
+        actual_score = self.black_score - self.white_score
+        _, best_mov, best_piece = self.minimax(3, False, float('-inf'), float('inf'))
+        for pieces in self.white_pieces:
+            if pieces.color == "black":
+                mov = pieces.get_possible_moves(pieces.x, pieces.y)
+                if len(mov) != 0:
+                    for mo in mov:
+                        move_data = (pieces, mo)
+                        possiblement.append(move_data)
+
+        if best_mov is None:
+            index = random.choice(possiblement)
+            best_piece = index[0]
+            best_mov = index[1]
+            print(best_piece.piece_type, " ", best_mov)
+
+        best_piece.application_movement(QPointF(best_mov[0], best_mov[1]), self.items(QPointF(best_mov[0] + 10, best_mov[1] + 10))[0])
+
+        if self.analog_clock2.check_mate():
+            self.label.setText("Black wins")
+            self.analog_clock2.is_running = False
+        else:
+            square = self.items(QPointF(self.black_king.x + 10, self.black_king.y + 10),
+                                        Qt.IntersectsItemShape)[0]
+            square.setBrush(QBrush(QColor(square.color)))
+            self.analog_clock2.is_running = False
+            self.current_player = "white"
+            self.white_move = True
+            self.black_clock = False
+            self.analog_clock.is_running = True
+            self.label.setText("White move")
+        white_king = self.white_king
+        if white_king.is_in_check(white_king.x, white_king.y):
+            square = self.items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[
+                0]
+            square.setBrush(QBrush(QColor("red")))
+        else:
+            square = self.items(QPointF(white_king.x + 10, white_king.y + 10), Qt.IntersectsItemShape)[
+                0]
+            square.setBrush(QBrush(QColor(square.color)))
