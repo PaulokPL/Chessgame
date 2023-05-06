@@ -29,9 +29,7 @@ class ConfigDialogIP(QDialog):
 
         self.ip_input = QLineEdit()
         self.ip_input.setInputMask("HHHH:HHHH:HHHH:HHHH:HHHH:HHHH:HHHH:HHHH;_")
-        # self.ip_input.setInputMask("000.000.000.000;_")
 
-        # self.ip_input.textChanged.connect(self.check_ip)
         self.port_input = QLineEdit()
         self.port_input.setInputMask("00000")
         layout.addRow("IP address:", self.ip_input)

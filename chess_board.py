@@ -1,5 +1,4 @@
 import random
-
 from PyQt5.QtCore import QVariant, QTime, QTimer, QMetaObject, Qt, Q_ARG, QPointF, pyqtSlot, QObject
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -9,10 +8,9 @@ from chess_square import ChessSquare
 from PyQt5.QtWidgets import QGraphicsProxyWidget, QPushButton
 from analog_clock import  AnalogClock
 from config import ConfigDialog
-import time
 import socket
 import threading
-import numpy as np
+
 class ChessBoard(QGraphicsScene):
     def __init__(self, mode, ip, port, parent=None):
         super().__init__(parent)
