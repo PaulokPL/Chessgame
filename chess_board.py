@@ -525,7 +525,7 @@ class ChessBoard(QGraphicsScene):
         best_mov = None
         possiblement = []
         actual_score = self.black_score - self.white_score
-        _, best_mov, best_piece = self.minimax(3, False, float('-inf'), float('inf'))
+        _, best_mov, best_piece = self.minimax(1, False, float('-inf'), float('inf'))
         for pieces in self.white_pieces:
             if pieces.color == "black":
                 mov = pieces.get_possible_moves(pieces.x, pieces.y)
